@@ -22,10 +22,6 @@ Thumbs.db
 # Migrations
 migrations/__pycache__/
 
-# Uploads
-uploads/*
-!uploads/.gitkeep
-
 # Test outputs
 *.log
 
@@ -46,13 +42,5 @@ uploads/*
 *.swp
 *.tmp
 
-# Ignore generated exercises
-uploads/generate exercises.py
-
-# Ignore exercises/muscles folders but keep .gitkeep
-uploads/exercises/*
-uploads/muscles/*
-!uploads/exercises/.gitkeep
-!uploads/muscles/.gitkeep
 .idea/misc.xml
 .idea/Gym-Tracker.iml

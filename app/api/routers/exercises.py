@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_current_user, get_exercise_service
-from app.api.schemas.exercises import ExerciseCreate, ExerciseResponse, ExerciseBulkCreate
+from app.schemas.exercises import ExerciseCreate, ExerciseResponse, ExerciseBulkCreate
 from app.services.exercise_service import ExerciseService
 
 exercises_router = APIRouter(tags=["Exercises"])

@@ -2,10 +2,11 @@ import os
 
 from fastapi import HTTPException, UploadFile
 
-from app.core.supabase import supabase_client
+from app.core.config import get_settings
 from app.repositories.qr_repository import QRRepository
 
 BUCKET_NAME = "qrcodes"
+settings = get_settings()
 
 
 class QRService:
@@ -29,15 +30,15 @@ class QRService:
         if not file_extension:
             file_extension = ".png"
 
-        storage_path = f"{user.id}/qrcode{file_extension}"
+        storage_dir = os.path.join(settings.UPLOADS_DIR, BUCKET_NAME, str(user.id))
+        os.makedirs(storage_dir, exist_ok=True)
+        storage_path = os.path.join(storage_dir, f"qrcode{file_extension}")
 
         try:
-            supabase_client.storage.from_(BUCKET_NAME).upload(
-                path=storage_path,
-                file=contents,
-                file_options={"contentType": file.content_type},
-            )
-            public_url = supabase_client.storage.from_(BUCKET_NAME).get_public_url(storage_path)
+            with open(storage_path, "wb") as f:
+                f.write(contents)
+
+            public_url = f"/uploads/{BUCKET_NAME}/{user.id}/qrcode{file_extension}"
             user.qr_code = public_url
             self.repo.save(user)
             return {
@@ -64,10 +65,10 @@ class QRService:
             raise HTTPException(status_code=404, detail="No QR code found for this user")
 
         try:
-            url_parts = user.qr_code.split(f"{BUCKET_NAME}/")
-            if len(url_parts) > 1:
-                storage_path = url_parts[1]
-                supabase_client.storage.from_(BUCKET_NAME).remove([storage_path])
+            relative_path = user.qr_code.replace("/uploads/", "")
+            absolute_path = os.path.join(settings.UPLOADS_DIR, relative_path)
+            if os.path.exists(absolute_path):
+                os.remove(absolute_path)
 
             user.qr_code = None
             self.repo.save(user)
@@ -77,5 +78,5 @@ class QRService:
             self.repo.save(user)
             return {
                 "success": False,
-                "message": f"Failed to delete from storage, but database updated: {str(exc)}",
+                "message": f"Failed to delete file, but database updated: {str(exc)}",
             }

@@ -1,16 +1,22 @@
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.core.supabase import supabase
+import jwt
+
+from app.utils.auth import decode_access_token
 
 security = HTTPBearer()
 
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):
-    """Verifies Supabase JWT tokens and retrieves user information."""
+    """Verifies local JWT tokens and retrieves user information."""
     access_token = credentials.credentials
-    user = supabase.auth.get_user(access_token)
-
-    if user.get("error"):
+    try:
+        payload = decode_access_token(access_token)
+    except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-    return user["user"]
+    auth_id = payload.get("sub")
+    if not auth_id:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    return {"id": auth_id}

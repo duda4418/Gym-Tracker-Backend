@@ -53,7 +53,7 @@ for name, pic, equipment, primary, secondary in exercises:
     })
 
 # Save as JSON
-json_path = "../exercises.json"
+json_path = "exercises.json"
 with open(json_path, "w") as f:
     json.dump(exercise_objects, f, indent=2)
 

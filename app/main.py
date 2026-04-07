@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
@@ -10,11 +12,14 @@ from app.api.routers.users import qrcode_router
 from app.api.routers.workout_sessions import workout_sessions_router
 from app.api.routers.workouts import workouts_router
 from app.api.routers.favourites import favorites_router
+from app.core.config import get_settings
 
+settings = get_settings()
 app = FastAPI()
 
+os.makedirs(settings.UPLOADS_DIR, exist_ok=True)
 
-# Allow CORS for all origins, methods, and headers (Change for production)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://192.168.1.11:3000",
@@ -25,14 +30,14 @@ app.add_middleware(
                    "http://10.11.8.231:3000",
                    "http://10.11.8.231:3001",
                    "https://gym-tracker-hempvie8u-davidrotarius-projects.vercel.app",
-                   "https://gym-tracker-topaz.vercel.app"],  # Allow only your frontend domain
+                   "https://gym-tracker-topaz.vercel.app"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ✅ Serve uploaded images as static files
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/uploads", StaticFiles(directory=settings.UPLOADS_DIR), name="uploads")
 
 # ✅ Register Routers
 app.include_router(muscles_router)

@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_current_user, get_split_service
-from app.api.schemas.splits import SplitCreate, SplitResponse, SplitResponse2
+from app.schemas.splits import SplitCreate, SplitResponse, SplitResponse2
 from app.services.split_service import SplitService
 from uuid import UUID
 

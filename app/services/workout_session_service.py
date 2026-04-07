@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.api.schemas.workout_sessions import WorkoutSessionResponse
+from app.schemas.workout_sessions import WorkoutSessionResponse
 from app.repositories.muscle_repository import MuscleRepository
 from app.repositories.workout_session_repository import WorkoutSessionRepository
 

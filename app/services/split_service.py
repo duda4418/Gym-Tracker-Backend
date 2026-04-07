@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.api.schemas.splits import SplitMuscleResponse, SplitMuscleResponse2, SplitResponse, SplitResponse2
+from app.schemas.splits import SplitMuscleResponse, SplitMuscleResponse2, SplitResponse, SplitResponse2
 from app.repositories.muscle_repository import MuscleRepository
 from app.repositories.split_repository import SplitRepository
 from app.repositories.user_repository import UserRepository

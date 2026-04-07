@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_muscle_service
-from app.api.schemas.muscles import MuscleCreate, MuscleResponse
+from app.schemas.muscles import MuscleCreate, MuscleResponse
 from app.services.muscle_service import MuscleService
 
 muscles_router = APIRouter(tags=["Muscles"])
