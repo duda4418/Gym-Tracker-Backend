@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     name = Column(String, nullable=True)
     qr_code = Column(String, nullable=True)
+    password_hash = Column(String, nullable=False)
 
     workout_sessions = relationship("WorkoutSession", back_populates="user")
     workouts = relationship("Workout", back_populates="user", cascade="all, delete-orphan")

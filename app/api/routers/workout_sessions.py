@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_workout_session_service
-from app.api.schemas.workout_sessions import WorkoutSessionCreate, WorkoutSessionResponse
+from app.schemas.workout_sessions import WorkoutSessionCreate, WorkoutSessionResponse
 from app.services.workout_session_service import WorkoutSessionService
 
 workout_sessions_router = APIRouter(tags=["Workout Sessions"])

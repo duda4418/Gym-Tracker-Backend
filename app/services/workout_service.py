@@ -1,9 +1,7 @@
-from datetime import timezone
-
 from fastapi import HTTPException
 from sqlalchemy import UUID
 
-from app.api.schemas.workouts import WorkoutResponse
+from app.schemas.workouts import WorkoutResponse
 from app.repositories.exercise_repository import ExerciseRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.workout_repository import WorkoutRepository

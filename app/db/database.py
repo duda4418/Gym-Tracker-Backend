@@ -1,14 +1,11 @@
-import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from contextlib import contextmanager
+from app.core.config import get_settings
 
 # Initialize the database connection
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:Vz0KFTYxhr4bN2td@db.ffcvexqfrsvmnsufoscv.supabase.co:5432/postgres",
-)
-engine = create_engine(DATABASE_URL)
+settings = get_settings()
+engine = create_engine(settings.DATABASE_URL)
 
 # Base Model
 Base = declarative_base()

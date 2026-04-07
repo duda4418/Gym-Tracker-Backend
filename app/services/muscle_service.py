@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.api.schemas.muscles import MuscleCreate, MuscleResponse
+from app.schemas.muscles import MuscleCreate, MuscleResponse
 from app.repositories.muscle_repository import MuscleRepository
 
 

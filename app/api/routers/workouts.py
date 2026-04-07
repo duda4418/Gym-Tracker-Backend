@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_current_user, get_workout_service
-from app.api.schemas.workouts import WorkoutCreate, WorkoutResponse
+from app.schemas.workouts import WorkoutCreate, WorkoutResponse
 from app.services.workout_service import WorkoutService
 
 workouts_router = APIRouter(tags=["Workouts"])

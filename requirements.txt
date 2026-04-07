@@ -1,25 +1,15 @@
-# FastAPI framework for building APIs
 fastapi
-
-# Database ORM
 sqlalchemy
-
-# PostgreSQL driver
 psycopg2
-
-# Environment variable management
 python-dotenv
-
-# Type validation and serialization
 pydantic
-
-# HTTP requests handling
 requests
-
 uvicorn
-
-supabase
-
 python-multipart
-
 pytest
+PyJWT
+passlib[bcrypt]
+bcrypt
+pydantic-settings
+psycopg[binary]
+alembic

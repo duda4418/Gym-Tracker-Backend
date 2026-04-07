@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_current_user, get_favorite_service
-from app.api.schemas.exercises import ExerciseResponse
+from app.schemas.exercises import ExerciseResponse
 from app.services.favorite_service import FavoriteService
 from uuid import UUID
 

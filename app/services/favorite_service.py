@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.api.schemas.exercises import ExerciseResponse
+from app.schemas.exercises import ExerciseResponse
 from app.repositories.exercise_repository import ExerciseRepository
 from app.repositories.favorite_repository import FavoriteRepository
 from app.repositories.muscle_repository import MuscleRepository

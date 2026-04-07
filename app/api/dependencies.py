@@ -1,8 +1,7 @@
 from fastapi import Depends, Header, HTTPException
-import httpx
+import jwt
 from sqlalchemy.orm import Session
 
-from app.core.supabase import supabase_client
 from app.db.session import get_db_session
 from app.repositories.auth_repository import AuthRepository
 from app.repositories.exercise_repository import ExerciseRepository
@@ -21,6 +20,7 @@ from app.services.qr_service import QRService
 from app.services.split_service import SplitService
 from app.services.workout_service import WorkoutService
 from app.services.workout_session_service import WorkoutSessionService
+from app.utils.auth import decode_access_token
 
 
 def get_current_user(authorization: str = Header(None)):
@@ -29,14 +29,15 @@ def get_current_user(authorization: str = Header(None)):
 
     token = authorization.split(" ")[1]
     try:
-        user = supabase_client.auth.get_user(token)
-    except httpx.HTTPError as exc:
-        raise HTTPException(status_code=503, detail=f"Supabase auth request failed: {type(exc).__name__}")
-
-    if user.user is None:
+        payload = decode_access_token(token)
+    except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    return user.user
+    auth_id = payload.get("sub")
+    if not auth_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    return {"id": auth_id}
 
 
 def get_auth_service(session: Session = Depends(get_db_session)) -> AuthService:
