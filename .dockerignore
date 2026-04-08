@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.git/
+.gitignore
+alembic/__pycache__/
+app/**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api.routers.auth import auth_router
 from app.api.routers.muscles import muscles_router
@@ -19,6 +20,7 @@ from app.utils.errors.database import DatabaseUnavailableError
 settings = get_settings()
 app = FastAPI()
 
+Instrumentator().instrument(app).expose(app)
 
 @app.exception_handler(DatabaseUnavailableError)
 async def handle_database_unavailable(_, exc: DatabaseUnavailableError):

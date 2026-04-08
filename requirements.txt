@@ -1,6 +1,6 @@
 fastapi
 sqlalchemy
-psycopg2
+psycopg2-binary
 python-dotenv
 pydantic
 requests
@@ -13,3 +13,4 @@ bcrypt
 pydantic-settings
 psycopg[binary]
 alembic
+prometheus_fastapi_instrumentator
