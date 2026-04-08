@@ -1,0 +1,242 @@
+[
+  {
+    "name": "Bench Press (Barbell)",
+    "pic": "00251201-Barbell-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Bench Press (Cable)",
+    "pic": "01511201-Cable-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Bench Press (Dumbbell)",
+    "pic": "02891201-Dumbbell-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Bench Press (Smith Machine)",
+    "pic": "07481201-Smith-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Butterfly (Pec Deck)",
+    "pic": "10301201-Lever-Pec-Deck-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Fly Crossovers",
+    "pic": "12691201-Cable-Standing-Up-Straight-Crossovers_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Chest Dip (Assisted)",
+    "pic": "00091201-Assisted-Chest-Dip-(kneeling)_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Chest Fly (Dumbbell)",
+    "pic": "03081201-Dumbbell-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Chest Fly (Machine)",
+    "pic": "05961201-Lever-Seated-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Chest Press (Machine)",
+    "pic": "05771201-Lever-Chest-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Decline Bench Press (Barbell)",
+    "pic": "03011201-Dumbbell-Decline-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa"
+    ]
+  },
+  {
+    "name": "Decline Bench Press (Dumbbell)",
+    "pic": "13001201-Lever-Decline-Chest-Press_Chest-FIX.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa"
+    ]
+  },
+  {
+    "name": "Decline Chest Fly (Dumbbell)",
+    "pic": "03021201-Dumbbell-Decline-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Incline Bench Press (Barbell)",
+    "pic": "00471201-Barbell-Incline-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Incline Bench Press (Dumbbell)",
+    "pic": "03141201-Dumbbell-Incline-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Incline Bench Press (Smith Machine)",
+    "pic": "07571201-Smith-Incline-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Incline Chest Press (Machine)",
+    "pic": "14791201-Lever-Incline-Chest-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Incline Push Ups",
+    "pic": "37851201-Incline-Push-Up-(on-box).mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Low Cable Fly Crossovers",
+    "pic": "01791201-Cable-Low-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Pullover (Dumbbell)",
+    "pic": "03751201-Dumbbell-Pullover_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Pullover (Machine)",
+    "pic": "22851201-Lever-Pullover-(plate-loaded)_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "03632f9c-8581-4a5e-b3da-3451ccb4b2bf"
+    ]
+  },
+  {
+    "name": "Push Up",
+    "pic": "06621201-Push-up-m_Chest.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": [
+      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
+      "e1595911-ce98-478f-a556-5d8961e2c7db"
+    ]
+  },
+  {
+    "name": "Seated Chest Flys (Cable)",
+    "pic": "38691101-Cable-Seated-Chest-Fly_Chest_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "secondary_muscles": []
+  }
+]
