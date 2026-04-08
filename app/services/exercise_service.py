@@ -43,8 +43,8 @@ class ExerciseService:
             for exercise in exercises
         ]
 
-    async def list_exercises_by_muscle(self, muscle_id, auth_id: str) -> list[ExerciseResponse]:
-        user = self.user_repo.get_by_auth_id(auth_id)
+    async def list_exercises_by_muscle(self, muscle_id, user_id) -> list[ExerciseResponse]:
+        user = self.user_repo.get_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found in database")
 

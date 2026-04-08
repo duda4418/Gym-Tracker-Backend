@@ -3,9 +3,13 @@ from typing import Any
 from unittest.mock import MagicMock
 import sys
 from pathlib import Path
+from types import SimpleNamespace
+from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+
+import app.api.dependencies as deps
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
@@ -22,6 +26,11 @@ def client() -> TestClient:
 @pytest.fixture(autouse=True)
 def clear_dependency_overrides():
     app.dependency_overrides = {}
+    app.dependency_overrides[deps.get_current_user] = lambda: SimpleNamespace(
+        id=uuid4(),
+        email="test@example.com",
+        name="Test User",
+    )
     yield
     app.dependency_overrides = {}
 

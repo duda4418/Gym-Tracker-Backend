@@ -1,5 +1,6 @@
+from uuid import UUID as PyUUID
+
 from fastapi import HTTPException
-from sqlalchemy import UUID
 
 from app.schemas.workouts import WorkoutResponse
 from app.repositories.exercise_repository import ExerciseRepository
@@ -28,30 +29,30 @@ class WorkoutService:
             date=workout.date,
         )
 
-    async def get_todays_workouts(self, auth_id: str) -> list[WorkoutResponse]:
-        user_id = self.user_repo.get_id_by_auth_id(auth_id)
-        if not user_id:
+    async def get_todays_workouts(self, user_id) -> list[WorkoutResponse]:
+        user = self.user_repo.get_by_id(user_id)
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        workouts = self.workout_repo.list_today()
+        workouts = self.workout_repo.list_today(user.id)
         return [self._to_response(workout) for workout in workouts]
 
-    async def get_workouts_for_exercise(self, auth_id: str, exercise_id: str) -> list[WorkoutResponse]:
+    async def get_workouts_for_exercise(self, user_id, exercise_id: str) -> list[WorkoutResponse]:
         try:
-            str(UUID(exercise_id))
+            PyUUID(exercise_id)
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid exercise_id format")
 
-        user_id = self.user_repo.get_id_by_auth_id(auth_id)
-        if not user_id:
+        user = self.user_repo.get_by_id(user_id)
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        workouts = self.workout_repo.list_for_exercise(user_id, exercise_id)
+        workouts = self.workout_repo.list_for_exercise(user.id, exercise_id)
         return [self._to_response(workout) for workout in workouts]
 
-    async def log_workout(self, auth_id: str, data):
-        user_id = self.user_repo.get_id_by_auth_id(auth_id)
-        if not user_id:
+    async def log_workout(self, user_id, data):
+        user = self.user_repo.get_by_id(user_id)
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         exercise_exists = self.exercise_repo.get_by_id(data.exercise_id)
@@ -61,26 +62,34 @@ class WorkoutService:
         if len(data.reps) != len(data.weights):
             raise HTTPException(status_code=400, detail="Reps and weights lists must be the same length")
 
-        workout = self.workout_repo.create(user_id, data.exercise_id, data.reps, data.weights)
+        workout = self.workout_repo.create(user.id, data.exercise_id, data.reps, data.weights)
         return {"message": "Workout logged successfully", "workout_id": workout.id}
 
-    async def get_workouts(self) -> list[WorkoutResponse]:
-        return [self._to_response(workout) for workout in self.workout_repo.list_all()]
+    async def get_workouts(self, user_id) -> list[WorkoutResponse]:
+        user = self.user_repo.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-    async def create_workout(self, data) -> WorkoutResponse:
+        return [self._to_response(workout) for workout in self.workout_repo.list_for_user(user.id)]
+
+    async def create_workout(self, user_id, data) -> WorkoutResponse:
+        user = self.user_repo.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
         exercise = self.exercise_repo.get_by_id(data.exercise_id)
         if not exercise:
             raise HTTPException(status_code=400, detail="Exercise not found")
 
-        workout = self.workout_repo.create_without_user(data.exercise_id, data.reps, data.weights)
+        workout = self.workout_repo.create(user.id, data.exercise_id, data.reps, data.weights)
         return self._to_response(workout)
 
-    async def delete_workout(self, auth_id: str, workout_id: str):
-        user_id = self.user_repo.get_id_by_auth_id(auth_id)
-        if not user_id:
+    async def delete_workout(self, user_id, workout_id: str):
+        user = self.user_repo.get_by_id(user_id)
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        workout = self.workout_repo.get_for_user(workout_id, user_id)
+        workout = self.workout_repo.get_for_user(workout_id, user.id)
         if not workout:
             raise HTTPException(status_code=404, detail="Workout not found")
 

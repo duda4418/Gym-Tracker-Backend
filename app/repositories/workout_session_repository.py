@@ -10,11 +10,11 @@ class WorkoutSessionRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def list_all(self):
-        return self.session.query(WorkoutSession).all()
+    def list_for_user(self, user_id):
+        return self.session.query(WorkoutSession).filter(WorkoutSession.user_id == user_id).all()
 
-    def create(self, split_id):
-        workout_session = WorkoutSession(id=uuid4(), split_id=split_id)
+    def create(self, split_id, user_id):
+        workout_session = WorkoutSession(id=uuid4(), split_id=split_id, user_id=user_id)
         self.session.add(workout_session)
         self.session.flush()
         return workout_session

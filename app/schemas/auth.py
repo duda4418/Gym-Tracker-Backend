@@ -1,16 +1,27 @@
 from pydantic import BaseModel
-from uuid import UUID
 
-class UserSignup(BaseModel):
+
+class SignupRequest(BaseModel):
     email: str
     password: str
     name: str
 
-class UserLogin(BaseModel):
+
+class LoginRequest(BaseModel):
     email: str
     password: str
 
-class UserResponse(BaseModel):
-    id: UUID
-    email: str
-    name: str
+
+
+class TokenPairResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+
+class LogoutRequest(BaseModel):
+    refresh_token: str | None = None

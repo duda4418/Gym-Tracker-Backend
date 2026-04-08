@@ -46,8 +46,8 @@ class FavoriteService:
             for exercise in sorted_exercises
         ]
 
-    async def add_favorite(self, auth_id: str, exercise_id):
-        user = self.user_repo.get_by_auth_id(auth_id)
+    async def add_favorite(self, user_id, exercise_id):
+        user = self.user_repo.get_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found in database")
 
@@ -62,8 +62,8 @@ class FavoriteService:
         self.favorite_repo.create(user.id, exercise_id)
         return self._fetch_exercises_by_muscle(exercise.muscle_id, user.id)
 
-    async def remove_favorite(self, auth_id: str, exercise_id):
-        user = self.user_repo.get_by_auth_id(auth_id)
+    async def remove_favorite(self, user_id, exercise_id):
+        user = self.user_repo.get_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found in database")
 
@@ -76,8 +76,8 @@ class FavoriteService:
         exercise = self.exercise_repo.get_by_id(exercise_id)
         return self._fetch_exercises_by_muscle(exercise.muscle_id, user.id)
 
-    async def get_favorites(self, auth_id: str):
-        user = self.user_repo.get_by_auth_id(auth_id)
+    async def get_favorites(self, user_id):
+        user = self.user_repo.get_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found in database")
 

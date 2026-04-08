@@ -11,13 +11,13 @@ class WorkoutRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def list_all(self) -> list[Workout]:
-        return self.session.query(Workout).all()
+    def list_for_user(self, user_id) -> list[Workout]:
+        return self.session.query(Workout).filter(Workout.user_id == user_id).all()
 
-    def list_today(self) -> list[Workout]:
+    def list_today(self, user_id) -> list[Workout]:
         now_utc = datetime.now(timezone.utc)
         today_start = now_utc.replace(hour=0, minute=0, second=0, microsecond=0)
-        all_workouts = self.session.query(Workout).all()
+        all_workouts = self.session.query(Workout).filter(Workout.user_id == user_id).all()
         return [
             workout
             for workout in all_workouts
@@ -27,7 +27,7 @@ class WorkoutRepository:
     def list_for_exercise(self, user_id, exercise_id: str) -> list[Workout]:
         return (
             self.session.query(Workout)
-            .filter(Workout.user_id == str(user_id))
+            .filter(Workout.user_id == user_id)
             .filter(cast(Workout.exercise_id, String) == exercise_id)
             .order_by(desc(Workout.date))
             .all()
@@ -40,18 +40,6 @@ class WorkoutRepository:
         workout = Workout(
             id=uuid4(),
             user_id=user_id,
-            exercise_id=exercise_id,
-            reps=reps,
-            weights=weights,
-        )
-        self.session.add(workout)
-        self.session.commit()
-        self.session.refresh(workout)
-        return workout
-
-    def create_without_user(self, exercise_id, reps, weights):
-        workout = Workout(
-            id=uuid4(),
             exercise_id=exercise_id,
             reps=reps,
             weights=weights,

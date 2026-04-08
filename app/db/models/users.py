@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.database import Base
@@ -13,6 +13,8 @@ class User(Base):
     name = Column(String, nullable=True)
     qr_code = Column(String, nullable=True)
     password_hash = Column(String, nullable=False)
+    refresh_token_hash = Column(String, nullable=True)
+    refresh_token_expires_at = Column(DateTime(timezone=True), nullable=True)
 
     workout_sessions = relationship("WorkoutSession", back_populates="user")
     workouts = relationship("Workout", back_populates="user", cascade="all, delete-orphan")
