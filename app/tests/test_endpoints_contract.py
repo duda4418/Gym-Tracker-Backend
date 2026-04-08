@@ -242,7 +242,7 @@ def test_log_workout(client):
 
 def test_get_workouts(client):
     class Service:
-        async def get_workouts(self):
+        async def get_workouts(self, _):
             return [{"id": str(uuid4()), "exercise_id": str(uuid4()), "reps": [10], "weights": [45], "date": _iso_now()}]
 
     client.app.dependency_overrides[deps.get_workout_service] = lambda: Service()
@@ -252,7 +252,7 @@ def test_get_workouts(client):
 
 def test_create_workout(client):
     class Service:
-        async def create_workout(self, _):
+        async def create_workout(self, *_):
             return {"id": str(uuid4()), "exercise_id": str(uuid4()), "reps": [8], "weights": [100], "date": _iso_now()}
 
     client.app.dependency_overrides[deps.get_workout_service] = lambda: Service()
@@ -273,7 +273,7 @@ def test_delete_workout(client):
 
 def test_get_workout_sessions(client):
     class Service:
-        async def get_workout_sessions(self):
+        async def get_workout_sessions(self, _):
             return [{"id": str(uuid4()), "date": _iso_now(), "split_id": str(uuid4()), "muscles": []}]
 
     client.app.dependency_overrides[deps.get_workout_session_service] = lambda: Service()
@@ -283,7 +283,7 @@ def test_get_workout_sessions(client):
 
 def test_create_workout_session(client):
     class Service:
-        async def create_workout_session(self, data):
+        async def create_workout_session(self, _, data):
             return {"id": str(uuid4()), "date": _iso_now(), "split_id": str(data.split_id), "muscles": data.muscles}
 
     client.app.dependency_overrides[deps.get_workout_session_service] = lambda: Service()
@@ -301,7 +301,7 @@ def test_auth_signup(client):
 
     client.app.dependency_overrides[deps.get_auth_service] = lambda: Service()
     response = client.post("/auth/signup", json={"email": "a@b.com", "password": "secret123", "name": "Alice"})
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 
 def test_auth_login(client):
@@ -311,6 +311,16 @@ def test_auth_login(client):
 
     client.app.dependency_overrides[deps.get_auth_service] = lambda: Service()
     response = client.post("/auth/login", json={"email": "a@b.com", "password": "secret123"})
+    assert response.status_code == 200
+
+
+def test_auth_refresh(client):
+    class Service:
+        async def refresh_tokens(self, _):
+            return {"access_token": "new-access", "refresh_token": "new-refresh", "token_type": "bearer"}
+
+    client.app.dependency_overrides[deps.get_auth_service] = lambda: Service()
+    response = client.post("/auth/refresh", json={"refresh_token": "refresh-token-1"})
     assert response.status_code == 200
 
 
@@ -326,7 +336,7 @@ def test_auth_me(client):
 
 def test_auth_logout(client):
     class Service:
-        async def logout(self, _):
+        async def logout(self, *_):
             return {"message": "User logged out successfully"}
 
     client.app.dependency_overrides[deps.get_auth_service] = lambda: Service()

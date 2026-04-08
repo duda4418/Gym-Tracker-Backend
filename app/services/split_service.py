@@ -17,8 +17,8 @@ class SplitService:
         self.user_repo = user_repo
         self.muscle_repo = muscle_repo
 
-    async def get_splits(self, auth_id: str) -> list[SplitResponse]:
-        user = self.user_repo.get_by_auth_id(auth_id)
+    async def get_splits(self, user_id) -> list[SplitResponse]:
+        user = self.user_repo.get_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found in database")
 
@@ -52,8 +52,8 @@ class SplitService:
             )
         return result
 
-    async def create_split(self, auth_id: str, data) -> SplitResponse2:
-        user = self.user_repo.get_by_auth_id(auth_id)
+    async def create_split(self, user_id, data) -> SplitResponse2:
+        user = self.user_repo.get_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found in database")
 
@@ -84,8 +84,8 @@ class SplitService:
             muscles=return_muscles,
         )
 
-    async def delete_split(self, split_id, auth_id: str):
-        user = self.user_repo.get_by_auth_id(auth_id)
+    async def delete_split(self, split_id, user_id):
+        user = self.user_repo.get_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found in database")
 

@@ -1,6 +1,7 @@
 import os
 
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
@@ -13,9 +14,15 @@ from app.api.routers.workout_sessions import workout_sessions_router
 from app.api.routers.workouts import workouts_router
 from app.api.routers.favourites import favorites_router
 from app.core.config import get_settings
+from app.utils.errors.database import DatabaseUnavailableError
 
 settings = get_settings()
 app = FastAPI()
+
+
+@app.exception_handler(DatabaseUnavailableError)
+async def handle_database_unavailable(_, exc: DatabaseUnavailableError):
+    return JSONResponse(status_code=503, content={"detail": exc.detail})
 
 os.makedirs(settings.UPLOADS_DIR, exist_ok=True)
 

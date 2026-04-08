@@ -5,9 +5,10 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_current_user, get_exercise_service
 from app.schemas.exercises import ExerciseCreate, ExerciseResponse, ExerciseBulkCreate
+from app.schemas.users import AuthenticatedUser
 from app.services.exercise_service import ExerciseService
 
-exercises_router = APIRouter(tags=["Exercises"])
+exercises_router = APIRouter(tags=["Exercises"], dependencies=[Depends(get_current_user)])
 
 
 @exercises_router.get("/exercises", response_model=List[ExerciseResponse])
@@ -18,7 +19,7 @@ async def get_exercises(exercise_service: ExerciseService = Depends(get_exercise
 @exercises_router.get("/exercises/by-muscle/{muscle_id}", response_model=List[ExerciseResponse])
 async def get_exercises_by_primary_muscle(
     muscle_id: UUID,
-    current_user=Depends(get_current_user),
+    current_user: AuthenticatedUser = Depends(get_current_user),
     exercise_service: ExerciseService = Depends(get_exercise_service),
 ):
     return await exercise_service.list_exercises_by_muscle(muscle_id, current_user.id)

@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 
+from app.repositories.split_repository import SplitRepository
 from app.schemas.workout_sessions import WorkoutSessionResponse
 from app.repositories.muscle_repository import MuscleRepository
 from app.repositories.workout_session_repository import WorkoutSessionRepository
@@ -10,12 +11,14 @@ class WorkoutSessionService:
         self,
         session_repo: WorkoutSessionRepository,
         muscle_repo: MuscleRepository,
+        split_repo: SplitRepository,
     ) -> None:
         self.session_repo = session_repo
         self.muscle_repo = muscle_repo
+        self.split_repo = split_repo
 
-    async def get_workout_sessions(self) -> list[WorkoutSessionResponse]:
-        sessions = self.session_repo.list_all()
+    async def get_workout_sessions(self, user_id) -> list[WorkoutSessionResponse]:
+        sessions = self.session_repo.list_for_user(user_id)
         return [
             WorkoutSessionResponse(
                 id=workout_session.id,
@@ -32,8 +35,12 @@ class WorkoutSessionService:
             for workout_session in sessions
         ]
 
-    async def create_workout_session(self, data) -> WorkoutSessionResponse:
-        workout_session = self.session_repo.create(data.split_id)
+    async def create_workout_session(self, user_id, data) -> WorkoutSessionResponse:
+        split = self.split_repo.get_for_user(data.split_id, user_id)
+        if not split:
+            raise HTTPException(status_code=404, detail="Split not found or unauthorized access")
+
+        workout_session = self.session_repo.create(data.split_id, user_id)
 
         for muscle_data in data.muscles:
             muscle_id = muscle_data["muscle_id"]
