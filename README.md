@@ -8,6 +8,9 @@ This project now includes:
 - Grafana for dashboards
 - Alertmanager for handling alerts triggered by Prometheus
 - OpenTelemetry tracing exported through an OpenTelemetry Collector
+- Tempo for trace storage and search
+- Loki for log storage and search
+- Promtail for shipping backend log files into Loki
 
 ### Services
 
@@ -16,6 +19,8 @@ This project now includes:
 - Grafana: `http://localhost:3005`
 - Alertmanager: `http://localhost:9093`
 - OTel Collector health: `http://localhost:13133`
+- Tempo: `http://localhost:3200`
+- Loki: `http://localhost:3100`
 
 ### What Alertmanager is for
 
@@ -48,9 +53,9 @@ docker compose up -d --build
 
 ### OpenTelemetry tracing setup
 
-The backend now emits OpenTelemetry traces and sends them to a local OpenTelemetry Collector.
-For now, the collector only logs received traces with its built-in `debug` exporter.
-This keeps the setup simple until Tempo and Loki are added later.
+The backend emits OpenTelemetry traces and sends them to a local OpenTelemetry Collector.
+The collector logs received traces with its built-in `debug` exporter and also forwards them to Tempo.
+Backend request logs are written as structured JSON lines and shipped to Loki through Promtail.
 
 #### What gets traced
 
@@ -58,12 +63,19 @@ This keeps the setup simple until Tempo and Loki are added later.
 - SQLAlchemy database calls
 - outgoing `requests` calls
 
+#### What gets logged to Loki
+
+- backend request completion logs
+- backend unhandled request errors
+- trace IDs and span IDs for trace ↔ log correlation
+
 #### Collector flow right now
 
 1. The backend creates spans with OpenTelemetry
 2. Spans are sent to the OTel Collector over OTLP/HTTP
 3. The Collector batches spans
 4. The Collector writes trace data to its own logs for local verification
+5. The Collector forwards traces to Tempo
 
 #### Tracing environment variables
 
@@ -77,6 +89,9 @@ OTEL_ENVIRONMENT=docker
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
 OTEL_EXPORTER_TIMEOUT_SECONDS=10
 OTEL_TRACES_SAMPLER_RATIO=1.0
+LOG_LEVEL=INFO
+LOGS_DIR=app/logs
+LOG_FILE_NAME=backend.log
 ```
 
 Outside Docker, tracing is disabled by default.
@@ -132,10 +147,14 @@ docker compose up -d alertmanager
 
 - A Prometheus datasource named `Prometheus`
 - An Alertmanager datasource named `Alertmanager`
+- A Tempo datasource named `Tempo`
+- A Loki datasource named `Loki`
 - A dashboard folder named `Gym Tracker`
 - A starter dashboard named `Gym Tracker Overview`
 - Prometheus alert rules for backend availability, 5xx rate, and high latency
 - An OpenTelemetry Collector that accepts OTLP traces on ports `4317` and `4318`
+- Tempo trace storage on port `3200`
+- Loki log storage on port `3100`
 
 ### Files added for Grafana
 
@@ -155,7 +174,11 @@ docker compose up -d alertmanager
 ### Files for OpenTelemetry
 
 - `app/core/telemetry.py`
+- `app/core/log_config.py`
 - `otel-collector-config.yml`
+- `tempo/tempo.yml`
+- `loki/loki-config.yml`
+- `promtail/promtail-config.yml`
 - `docker-compose.yml`
 - `requirements.txt`
 
@@ -173,8 +196,15 @@ docker compose up -d alertmanager
 1. FastAPI starts with optional OpenTelemetry instrumentation
 2. Each request creates a trace with spans for the API layer and database work
 3. The backend exports spans to the OTel Collector
-4. The Collector logs those spans locally for verification
-5. Later, the same Collector can forward traces to Tempo and logs to Loki
+4. The Collector forwards spans to Tempo
+5. Grafana can query Tempo to inspect traces
+
+### How the logging flow works
+
+1. The backend writes structured JSON logs to `app/logs/backend.log`
+2. Each log line includes `trace_id` and `span_id` when a trace is active
+3. Promtail tails the log file and pushes entries to Loki
+4. Grafana can query Loki and link log lines back to Tempo traces
 
 ### Starter alerts included
 
@@ -223,11 +253,11 @@ docker compose logs alertmanager --tail 100
 
 ### How to test OpenTelemetry locally
 
-Start or rebuild the backend and collector:
+Start or rebuild the backend, collector, Tempo, Loki, and Promtail:
 
 ```powershell
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
-docker compose up -d --build backend otel-collector
+docker compose up -d --build backend otel-collector tempo loki promtail grafana
 ```
 
 Check collector health:
@@ -249,7 +279,36 @@ cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
 docker compose logs otel-collector --tail 100
 ```
 
-You should see spans for the backend service in the collector logs.
+Inspect backend logs written for Loki:
+
+```powershell
+Get-Content C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend\app\logs\backend.log -Tail 20
+```
+
+Inspect Promtail logs:
+
+```powershell
+cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
+docker compose logs promtail --tail 100
+```
+
+Query Loki directly:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing "http://localhost:3100/loki/api/v1/query?query=%7Bservice%3D%22gym-tracker-backend%22%7D" | Select-Object -ExpandProperty Content
+```
+
+If you grab a `trace_id` from one backend log line, you can also query Tempo directly:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://localhost:3200/api/traces/<trace_id> | Select-Object -ExpandProperty Content
+```
+
+In Grafana, you can now use:
+
+- Explore → `Tempo` to browse traces
+- Explore → `Loki` to browse logs
+- the Loki datasource's `TraceID` derived field to jump from a log line to its Tempo trace
 
 ### Gmail troubleshooting tips
 
@@ -275,4 +334,5 @@ Once you are comfortable with the local flow, you can extend `alertmanager.yml` 
 - Grafana stores state in the named volume `grafana_data`
 - Alertmanager uses Gmail SMTP settings passed through container environment variables
 - OpenTelemetry traces are enabled in Docker Compose and disabled by default outside Docker
+- Backend logs are written to `app/logs/backend.log` so Promtail can ship them reliably on local Windows/Docker setups
 

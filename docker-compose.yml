@@ -38,15 +38,21 @@ services:
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://otel-collector:4318/v1/traces}
       OTEL_EXPORTER_TIMEOUT_SECONDS: ${OTEL_EXPORTER_TIMEOUT_SECONDS:-10}
       OTEL_TRACES_SAMPLER_RATIO: ${OTEL_TRACES_SAMPLER_RATIO:-1.0}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOGS_DIR: ${LOGS_DIR:-app/logs}
+      LOG_FILE_NAME: ${LOG_FILE_NAME:-backend.log}
     ports:
       - "8000:8000"
     volumes:
       - ./app/uploads:/app/app/uploads
+      - ./app/logs:/app/app/logs
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.123.0
     container_name: gym-tracker-otel-collector
     restart: unless-stopped
+    depends_on:
+      - tempo
     command:
       - "--config=/etc/otelcol-contrib/config.yaml"
     ports:
@@ -55,6 +61,41 @@ services:
       - "13133:13133"
     volumes:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml:ro
+
+  tempo:
+    image: grafana/tempo:2.7.2
+    container_name: gym-tracker-tempo
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/tempo/tempo.yml"
+    ports:
+      - "3200:3200"
+    volumes:
+      - ./tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: gym-tracker-loki
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/loki/local-config.yaml"
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: gym-tracker-promtail
+    restart: unless-stopped
+    depends_on:
+      - loki
+      - backend
+    command:
+      - "-config.file=/etc/promtail/config.yml"
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - ./app/logs:/var/log/gym-tracker:ro
 
   prometheus:
     image: prom/prometheus
@@ -94,6 +135,8 @@ services:
     depends_on:
       - prometheus
       - alertmanager
+      - tempo
+      - loki
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}

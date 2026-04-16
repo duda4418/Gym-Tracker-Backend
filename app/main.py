@@ -1,6 +1,8 @@
 import os
+from time import perf_counter
 
 from fastapi import FastAPI
+from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
@@ -15,10 +17,13 @@ from app.api.routers.workout_sessions import workout_sessions_router
 from app.api.routers.workouts import workouts_router
 from app.api.routers.favourites import favorites_router
 from app.core.config import get_settings
+from app.core.log_config import configure_logging, get_app_logger
 from app.core.telemetry import configure_telemetry
 from app.utils.errors.database import DatabaseUnavailableError
 
 settings = get_settings()
+configure_logging(settings)
+logger = get_app_logger()
 app = FastAPI()
 
 Instrumentator().instrument(app).expose(app)
@@ -29,6 +34,41 @@ async def handle_database_unavailable(_, exc: DatabaseUnavailableError):
     return JSONResponse(status_code=503, content={"detail": exc.detail})
 
 os.makedirs(settings.UPLOADS_DIR, exist_ok=True)
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = perf_counter()
+    client_host = request.client.host if request.client else None
+
+    try:
+        response = await call_next(request)
+    except Exception:
+        duration_ms = round((perf_counter() - start) * 1000, 2)
+        logger.exception(
+            "Unhandled request error",
+            extra={
+                "method": request.method,
+                "path": request.url.path,
+                "status_code": 500,
+                "duration_ms": duration_ms,
+                "client_host": client_host,
+            },
+        )
+        raise
+
+    duration_ms = round((perf_counter() - start) * 1000, 2)
+    logger.info(
+        "Request completed",
+        extra={
+            "method": request.method,
+            "path": request.url.path,
+            "status_code": response.status_code,
+            "duration_ms": duration_ms,
+            "client_host": client_host,
+        },
+    )
+    return response
 
 
 app.add_middleware(
@@ -47,10 +87,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Serve uploaded images as static files
+# Serve uploaded images as static files
 app.mount("/uploads", StaticFiles(directory=settings.UPLOADS_DIR), name="uploads")
 
-# ✅ Register Routers
 app.include_router(muscles_router)
 app.include_router(exercises_router)
 app.include_router(splits_router)

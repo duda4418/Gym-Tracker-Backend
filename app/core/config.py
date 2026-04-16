@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: str = "http://localhost:4318/v1/traces"
     OTEL_EXPORTER_TIMEOUT_SECONDS: int = 10
     OTEL_TRACES_SAMPLER_RATIO: float = 1.0
+    LOG_LEVEL: str = "INFO"
+    LOGS_DIR: str = "app/logs"
+    LOG_FILE_NAME: str = "backend.log"
 
     POSTGRES_USER: str = "app_user"
     POSTGRES_PASSWORD: str = "app_password"
