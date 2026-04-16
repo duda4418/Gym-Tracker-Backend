@@ -3,6 +3,7 @@ from time import perf_counter
 
 from fastapi import FastAPI
 from fastapi import Request
+from opentelemetry import trace
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
@@ -17,7 +18,11 @@ from app.api.routers.workout_sessions import workout_sessions_router
 from app.api.routers.workouts import workouts_router
 from app.api.routers.favourites import favorites_router
 from app.core.config import get_settings
-from app.core.log_config import configure_logging, get_app_logger
+from app.core.log_config import (
+    configure_logging,
+    get_app_logger,
+    sanitize_request_scope,
+)
 from app.core.telemetry import configure_telemetry
 from app.utils.errors.database import DatabaseUnavailableError
 
@@ -40,16 +45,25 @@ os.makedirs(settings.UPLOADS_DIR, exist_ok=True)
 async def log_requests(request: Request, call_next):
     start = perf_counter()
     client_host = request.client.host if request.client else None
+    safe_base_url = str(request.base_url).rstrip("/")
 
     try:
         response = await call_next(request)
     except Exception:
+        safe_path = sanitize_request_scope(request)
+        current_span = trace.get_current_span()
+        if current_span.is_recording():
+            current_span.set_attribute("http.target", safe_path)
+            current_span.set_attribute("http.route", safe_path)
+            current_span.set_attribute("url.path", safe_path)
+            current_span.set_attribute("url.query", "")
+            current_span.set_attribute("http.url", f"{safe_base_url}{safe_path}")
         duration_ms = round((perf_counter() - start) * 1000, 2)
         logger.exception(
             "Unhandled request error",
             extra={
                 "method": request.method,
-                "path": request.url.path,
+                "path": safe_path,
                 "status_code": 500,
                 "duration_ms": duration_ms,
                 "client_host": client_host,
@@ -57,12 +71,20 @@ async def log_requests(request: Request, call_next):
         )
         raise
 
+    safe_path = sanitize_request_scope(request)
+    current_span = trace.get_current_span()
+    if current_span.is_recording():
+        current_span.set_attribute("http.target", safe_path)
+        current_span.set_attribute("http.route", safe_path)
+        current_span.set_attribute("url.path", safe_path)
+        current_span.set_attribute("url.query", "")
+        current_span.set_attribute("http.url", f"{safe_base_url}{safe_path}")
     duration_ms = round((perf_counter() - start) * 1000, 2)
     logger.info(
         "Request completed",
         extra={
             "method": request.method,
-            "path": request.url.path,
+            "path": safe_path,
             "status_code": response.status_code,
             "duration_ms": duration_ms,
             "client_host": client_host,
