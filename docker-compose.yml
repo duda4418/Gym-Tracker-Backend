@@ -44,6 +44,26 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus:/etc/prometheus/rules:ro
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: gym-tracker-alertmanager
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - /etc/alertmanager/entrypoint.sh
+    environment:
+      ALERTMANAGER_SMARTHOST: ${ALERTMANAGER_SMARTHOST:-smtp.gmail.com:587}
+      ALERTMANAGER_EMAIL_FROM: ${ALERTMANAGER_EMAIL_FROM:-dudadud4418@gmail.com}
+      ALERTMANAGER_EMAIL_TO: ${ALERTMANAGER_EMAIL_TO:-dudadud4418@gmail.com}
+      ALERTMANAGER_AUTH_USERNAME: ${ALERTMANAGER_AUTH_USERNAME:-dudadud4418@gmail.com}
+      ALERTMANAGER_AUTH_PASSWORD: ${ALERTMANAGER_AUTH_PASSWORD:-}
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./alertmanager-entrypoint.sh:/etc/alertmanager/entrypoint.sh:ro
 
   grafana:
     image: grafana/grafana:11.1.0
@@ -51,6 +71,7 @@ services:
     restart: unless-stopped
     depends_on:
       - prometheus
+      - alertmanager
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}

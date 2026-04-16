@@ -660,6 +660,36 @@
       ],
       "title": "CPU Usage",
       "type": "timeseries"
+    },
+    {
+      "description": "Shows currently active backend alerts from Grafana/Alertmanager.",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 9,
+      "options": {
+        "alertInstanceLabelFilter": "job=backend",
+        "dashboardAlerts": false,
+        "groupMode": "default",
+        "maxItems": 10,
+        "showInactiveAlerts": false,
+        "sortOrder": 1,
+        "stateFilter": {
+          "alerting": true,
+          "firing": true,
+          "no_data": false,
+          "normal": false,
+          "ok": false,
+          "paused": false,
+          "pending": true
+        },
+        "viewMode": "list"
+      },
+      "title": "Active Alerts",
+      "type": "alertlist"
     }
   ],
   "refresh": "10s",
@@ -681,7 +711,7 @@
   "timezone": "",
   "title": "Gym Tracker Overview",
   "uid": "gym-tracker-overview",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
 
