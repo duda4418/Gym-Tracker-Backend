@@ -27,6 +27,8 @@ services:
         condition: service_healthy
       otel-collector:
         condition: service_started
+      pyroscope:
+        condition: service_started
     env_file:
       - .env
     environment:
@@ -38,6 +40,12 @@ services:
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://otel-collector:4318/v1/traces}
       OTEL_EXPORTER_TIMEOUT_SECONDS: ${OTEL_EXPORTER_TIMEOUT_SECONDS:-10}
       OTEL_TRACES_SAMPLER_RATIO: ${OTEL_TRACES_SAMPLER_RATIO:-1.0}
+      PYROSCOPE_ENABLED: ${PYROSCOPE_ENABLED:-true}
+      PYROSCOPE_SERVER_ADDRESS: ${PYROSCOPE_SERVER_ADDRESS:-http://pyroscope:4040}
+      PYROSCOPE_APPLICATION_NAME: ${PYROSCOPE_APPLICATION_NAME:-gym-tracker-backend}
+      PYROSCOPE_SAMPLE_RATE: ${PYROSCOPE_SAMPLE_RATE:-100}
+      PYROSCOPE_GIL_ONLY: ${PYROSCOPE_GIL_ONLY:-true}
+      PYROSCOPE_ENABLE_LOGGING: ${PYROSCOPE_ENABLE_LOGGING:-false}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOGS_DIR: ${LOGS_DIR:-app/logs}
       LOG_FILE_NAME: ${LOG_FILE_NAME:-backend.log}
@@ -83,6 +91,21 @@ services:
       - "3100:3100"
     volumes:
       - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+
+  pyroscope:
+    image: grafana/pyroscope:1.12.0
+    container_name: gym-tracker-pyroscope
+    restart: unless-stopped
+    command:
+      - "-target=all"
+      - "-server.http-listen-port=4040"
+      - "-storage.backend=filesystem"
+      - "-storage.filesystem.dir=/var/lib/pyroscope"
+      - "-usage-stats.enabled=false"
+    ports:
+      - "4040:4040"
+    volumes:
+      - pyroscope_data:/var/lib/pyroscope
 
   promtail:
     image: grafana/promtail:3.2.1
@@ -137,6 +160,7 @@ services:
       - alertmanager
       - tempo
       - loki
+      - pyroscope
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -151,3 +175,4 @@ services:
 volumes:
   pgdata:
   grafana_data:
+  pyroscope_data:

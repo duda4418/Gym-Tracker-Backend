@@ -11,6 +11,7 @@ This project now includes:
 - Tempo for trace storage and search
 - Loki for log storage and search
 - Promtail for shipping backend log files into Loki
+- Pyroscope for continuous profiling
 
 ### Services
 
@@ -21,6 +22,7 @@ This project now includes:
 - OTel Collector health: `http://localhost:13133`
 - Tempo: `http://localhost:3200`
 - Loki: `http://localhost:3100`
+- Pyroscope: `http://localhost:4040`
 
 ### What Alertmanager is for
 
@@ -97,6 +99,34 @@ LOG_FILE_NAME=backend.log
 Outside Docker, tracing is disabled by default.
 Inside Docker Compose, the backend enables tracing automatically unless you override `OTEL_ENABLED`.
 
+### Pyroscope profiling setup
+
+The backend can also send continuous profiling data to Pyroscope.
+This is useful for learning where Python code spends CPU time while the service is running.
+
+#### What Pyroscope adds
+
+- continuous CPU profiling for the backend process
+- profile tags for service name, environment, and version
+- a Grafana datasource for profile exploration
+
+#### Profiling environment variables
+
+```dotenv
+PYROSCOPE_ENABLED=true
+PYROSCOPE_SERVER_ADDRESS=http://pyroscope:4040
+PYROSCOPE_APPLICATION_NAME=gym-tracker-backend
+PYROSCOPE_SAMPLE_RATE=100
+PYROSCOPE_GIL_ONLY=true
+PYROSCOPE_ENABLE_LOGGING=false
+```
+
+Best-practice choice in this setup:
+
+- profiling is opt-in
+- it is enabled by default only in Docker Compose
+- the Python client is imported dynamically so local host-side imports/tests stay lightweight
+
 ### Gmail email alerting setup
 
 Alertmanager is wired to send alerts to:
@@ -149,12 +179,14 @@ docker compose up -d alertmanager
 - An Alertmanager datasource named `Alertmanager`
 - A Tempo datasource named `Tempo`
 - A Loki datasource named `Loki`
+- A Pyroscope datasource named `Pyroscope`
 - A dashboard folder named `Gym Tracker`
 - A starter dashboard named `Gym Tracker Overview`
 - Prometheus alert rules for backend availability, 5xx rate, and high latency
 - An OpenTelemetry Collector that accepts OTLP traces on ports `4317` and `4318`
 - Tempo trace storage on port `3200`
 - Loki log storage on port `3100`
+- Pyroscope profiling on port `4040`
 
 ### Files added for Grafana
 
@@ -175,6 +207,7 @@ docker compose up -d alertmanager
 
 - `app/core/telemetry.py`
 - `app/core/log_config.py`
+- `app/core/profiling.py`
 - `otel-collector-config.yml`
 - `tempo/tempo.yml`
 - `loki/loki-config.yml`
@@ -205,6 +238,13 @@ docker compose up -d alertmanager
 2. Each log line includes `trace_id` and `span_id` when a trace is active
 3. Promtail tails the log file and pushes entries to Loki
 4. Grafana can query Loki and link log lines back to Tempo traces
+
+### How the profiling flow works
+
+1. The backend starts with Pyroscope profiling enabled in Docker Compose
+2. The Python Pyroscope client continuously samples CPU usage in-process
+3. Profiles are pushed to the Pyroscope server
+4. Grafana queries Pyroscope to render flame graphs and profile views
 
 ### Starter alerts included
 
@@ -310,6 +350,34 @@ In Grafana, you can now use:
 - Explore → `Loki` to browse logs
 - the Loki datasource's `TraceID` derived field to jump from a log line to its Tempo trace
 
+### How to test Pyroscope locally
+
+Start or rebuild the backend, Pyroscope, and Grafana:
+
+```powershell
+cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
+docker compose up -d --build backend pyroscope grafana
+```
+
+Check that Pyroscope is reachable:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://localhost:4040 | Select-Object -ExpandProperty StatusCode
+```
+
+Generate some backend activity:
+
+```powershell
+1..20 | ForEach-Object { Invoke-WebRequest -UseBasicParsing http://localhost:8000/ | Out-Null }
+```
+
+Then open Grafana and use:
+
+- Explore → `Pyroscope`
+- select the application `gym-tracker-backend`
+
+You should start seeing CPU profile data after a short time window.
+
 ### Gmail troubleshooting tips
 
 - Gmail SMTP host: `smtp.gmail.com:587`
@@ -335,4 +403,5 @@ Once you are comfortable with the local flow, you can extend `alertmanager.yml` 
 - Alertmanager uses Gmail SMTP settings passed through container environment variables
 - OpenTelemetry traces are enabled in Docker Compose and disabled by default outside Docker
 - Backend logs are written to `app/logs/backend.log` so Promtail can ship them reliably on local Windows/Docker setups
+- Pyroscope profiling is enabled in Docker Compose and disabled by default outside Docker
 

@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: str = "http://localhost:4318/v1/traces"
     OTEL_EXPORTER_TIMEOUT_SECONDS: int = 10
     OTEL_TRACES_SAMPLER_RATIO: float = 1.0
+
+    PYROSCOPE_ENABLED: bool = False
+    PYROSCOPE_SERVER_ADDRESS: str = "http://localhost:4040"
+    PYROSCOPE_APPLICATION_NAME: str = "gym-tracker-backend"
+    PYROSCOPE_SAMPLE_RATE: int = 100
+    PYROSCOPE_GIL_ONLY: bool = True
+    PYROSCOPE_ENABLE_LOGGING: bool = False
+
     LOG_LEVEL: str = "INFO"
     LOGS_DIR: str = "app/logs"
     LOG_FILE_NAME: str = "backend.log"

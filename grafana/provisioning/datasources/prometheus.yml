@@ -24,6 +24,17 @@ datasources:
     access: proxy
     url: http://tempo:3200
     jsonData:
+      tracesToProfiles:
+        customQuery: false
+        datasourceUid: pyroscope
+        profileTypeId: process_cpu:cpu:nanoseconds:cpu:nanoseconds
+        tags:
+          - key: service.name
+            value: service_name
+          - key: service.version
+            value: version
+          - key: deployment.environment
+            value: environment
       tracesToLogsV2:
         customQuery: true
         datasourceUid: loki
@@ -44,5 +55,12 @@ datasources:
           name: TraceID
           url: '$${__value.raw}'
       maxLines: 1000
+    editable: false
+
+  - name: Pyroscope
+    uid: pyroscope
+    type: grafana-pyroscope-datasource
+    access: proxy
+    url: http://pyroscope:4040
     editable: false
 

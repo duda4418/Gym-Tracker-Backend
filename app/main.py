@@ -23,11 +23,13 @@ from app.core.log_config import (
     get_app_logger,
     sanitize_request_scope,
 )
+from app.core.profiling import configure_profiling
 from app.core.telemetry import configure_telemetry
 from app.utils.errors.database import DatabaseUnavailableError
 
 settings = get_settings()
 configure_logging(settings)
+configure_profiling(settings)
 logger = get_app_logger()
 app = FastAPI()
 
