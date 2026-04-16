@@ -7,6 +7,7 @@ This project now includes:
 - Prometheus for scraping metrics
 - Grafana for dashboards
 - Alertmanager for handling alerts triggered by Prometheus
+- OpenTelemetry tracing exported through an OpenTelemetry Collector
 
 ### Services
 
@@ -14,6 +15,7 @@ This project now includes:
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3005`
 - Alertmanager: `http://localhost:9093`
+- OTel Collector health: `http://localhost:13133`
 
 ### What Alertmanager is for
 
@@ -43,6 +45,42 @@ Default values are defined in `docker-compose.yml` and mirrored in `.env.example
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
 docker compose up -d --build
 ```
+
+### OpenTelemetry tracing setup
+
+The backend now emits OpenTelemetry traces and sends them to a local OpenTelemetry Collector.
+For now, the collector only logs received traces with its built-in `debug` exporter.
+This keeps the setup simple until Tempo and Loki are added later.
+
+#### What gets traced
+
+- incoming FastAPI requests
+- SQLAlchemy database calls
+- outgoing `requests` calls
+
+#### Collector flow right now
+
+1. The backend creates spans with OpenTelemetry
+2. Spans are sent to the OTel Collector over OTLP/HTTP
+3. The Collector batches spans
+4. The Collector writes trace data to its own logs for local verification
+
+#### Tracing environment variables
+
+These variables are available for local customization:
+
+```dotenv
+OTEL_ENABLED=true
+OTEL_SERVICE_NAME=gym-tracker-backend
+OTEL_SERVICE_VERSION=1.0.0
+OTEL_ENVIRONMENT=docker
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
+OTEL_EXPORTER_TIMEOUT_SECONDS=10
+OTEL_TRACES_SAMPLER_RATIO=1.0
+```
+
+Outside Docker, tracing is disabled by default.
+Inside Docker Compose, the backend enables tracing automatically unless you override `OTEL_ENABLED`.
 
 ### Gmail email alerting setup
 
@@ -97,6 +135,7 @@ docker compose up -d alertmanager
 - A dashboard folder named `Gym Tracker`
 - A starter dashboard named `Gym Tracker Overview`
 - Prometheus alert rules for backend availability, 5xx rate, and high latency
+- An OpenTelemetry Collector that accepts OTLP traces on ports `4317` and `4318`
 
 ### Files added for Grafana
 
@@ -113,6 +152,13 @@ docker compose up -d alertmanager
 - `docker-compose.yml`
 - `.env.example`
 
+### Files for OpenTelemetry
+
+- `app/core/telemetry.py`
+- `otel-collector-config.yml`
+- `docker-compose.yml`
+- `requirements.txt`
+
 ### How the alert flow works
 
 1. The backend exposes metrics at `/metrics`
@@ -121,6 +167,14 @@ docker compose up -d alertmanager
 4. If a rule stays true long enough, Prometheus sends an alert to Alertmanager
 5. Alertmanager groups the alert and sends it to Gmail SMTP
 6. The alert is still visible in the Alertmanager UI and can also be inspected from Grafana
+
+### How the tracing flow works
+
+1. FastAPI starts with optional OpenTelemetry instrumentation
+2. Each request creates a trace with spans for the API layer and database work
+3. The backend exports spans to the OTel Collector
+4. The Collector logs those spans locally for verification
+5. Later, the same Collector can forward traces to Tempo and logs to Loki
 
 ### Starter alerts included
 
@@ -167,6 +221,36 @@ cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
 docker compose logs alertmanager --tail 100
 ```
 
+### How to test OpenTelemetry locally
+
+Start or rebuild the backend and collector:
+
+```powershell
+cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
+docker compose up -d --build backend otel-collector
+```
+
+Check collector health:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://localhost:13133 | Select-Object -ExpandProperty Content
+```
+
+Generate a traced request:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://localhost:8000/
+```
+
+Inspect collector logs for received spans:
+
+```powershell
+cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
+docker compose logs otel-collector --tail 100
+```
+
+You should see spans for the backend service in the collector logs.
+
 ### Gmail troubleshooting tips
 
 - Gmail SMTP host: `smtp.gmail.com:587`
@@ -190,4 +274,5 @@ Once you are comfortable with the local flow, you can extend `alertmanager.yml` 
 - Prometheus scrapes the backend through the Compose service name `backend:8000`
 - Grafana stores state in the named volume `grafana_data`
 - Alertmanager uses Gmail SMTP settings passed through container environment variables
+- OpenTelemetry traces are enabled in Docker Compose and disabled by default outside Docker
 

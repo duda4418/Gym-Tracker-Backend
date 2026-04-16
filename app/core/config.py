@@ -9,6 +9,13 @@ class Settings(BaseSettings):
     """Pydantic settings for application configuration."""
 
     DEBUG: bool = False
+    OTEL_ENABLED: bool = False
+    OTEL_SERVICE_NAME: str = "gym-tracker-backend"
+    OTEL_SERVICE_VERSION: str = "1.0.0"
+    OTEL_ENVIRONMENT: str = "development"
+    OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: str = "http://localhost:4318/v1/traces"
+    OTEL_EXPORTER_TIMEOUT_SECONDS: int = 10
+    OTEL_TRACES_SAMPLER_RATIO: float = 1.0
 
     POSTGRES_USER: str = "app_user"
     POSTGRES_PASSWORD: str = "app_password"
