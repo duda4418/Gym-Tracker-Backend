@@ -2,9 +2,13 @@
 __pycache__/
 .pytest_cache/
 .git/
+.idea/
 .gitignore
+.env
+.env.*
 alembic/__pycache__/
 app/**/__pycache__/
+app/logs/
 *.pyc
 *.pyo
 *.pyd

@@ -405,3 +405,91 @@ Once you are comfortable with the local flow, you can extend `alertmanager.yml` 
 - Backend logs are written to `app/logs/backend.log` so Promtail can ship them reliably on local Windows/Docker setups
 - Pyroscope profiling is enabled in Docker Compose and disabled by default outside Docker
 
+## AWS backend CI/CD (`EC2` + `RDS`)
+
+This repository now includes a production deployment workflow at `.github/workflows/backend-deploy.yml`.
+
+On every push to `master` or `main` (and on manual `workflow_dispatch`), the workflow:
+
+1. assumes the GitHub OIDC role `arn:aws:iam::606008290381:role/gym-tracker-backend-gha-role`
+2. builds the backend Docker image from `Dockerfile`
+3. tags the image with the full commit SHA and also updates `latest`
+4. pushes the image to `606008290381.dkr.ecr.eu-central-1.amazonaws.com/gym-tracker-backend`
+5. sends an AWS Systems Manager command to EC2 instance `i-009bf1df452c9aba3`
+6. pulls the new image on the instance, runs `alembic upgrade head`, restarts the `gym-tracker-backend` container, verifies `GET /` returns `{"status": "ok"}`, and prunes old Docker images
+
+### Optional GitHub repository variables
+
+The workflow has safe defaults checked into the repo, but you can override them with repository-level Actions variables:
+
+- `AWS_REGION`
+- `AWS_ROLE_ARN`
+- `ECR_REPOSITORY_URI`
+- `EC2_INSTANCE_ID`
+- `CONTAINER_NAME`
+- `REMOTE_APP_DIR`
+- `HOST_PORT`
+- `CONTAINER_PORT`
+
+If you do not set them, the workflow defaults to the current production values in AWS and exposes the backend on port `8000`.
+
+### One-time EC2 setup
+
+Before the first deployment, the EC2 instance needs:
+
+- Docker installed and running
+- AWS CLI installed
+- AWS Systems Manager Agent connected
+- the EC2 instance profile with permissions to pull from ECR and receive SSM commands
+- a production env file at `/opt/gym-tracker/backend/backend.env`
+
+Use `deploy/ec2/backend.env.example` as the template for that EC2 env file.
+
+Important for `RDS`:
+
+- set `POSTGRES_HOST` to `gym-tracker-prod-postgres.cna4m8i443ki.eu-central-1.amazonaws.com`
+- keep `POSTGRES_PORT=5432`
+- set `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` to the values configured for your RDS instance
+- set a real production `JWT_SECRET_KEY`
+
+### Deployment behavior on EC2
+
+The deployment command expects the env file here:
+
+- `/opt/gym-tracker/backend/backend.env`
+
+By default the workflow maps:
+
+- host port `8000`
+- container port `8000`
+
+You can override those with the `HOST_PORT` and `CONTAINER_PORT` repository variables if the EC2 host or container image uses a different port.
+
+It creates or reuses these Docker volumes on the instance:
+
+- `gym-tracker-backend-logs`
+- `gym-tracker-backend-uploads`
+
+The running container name is:
+
+- `gym-tracker-backend`
+
+### Verifying a deployment
+
+After the workflow succeeds, verify:
+
+- the GitHub Actions run is green
+- the new SHA tag exists in ECR
+- the SSM command finished with status `Success`
+- the container is running on the instance
+- `http://<ec2-public-ip>:8000/` returns `{"status": "ok"}` if the security group allows direct access
+
+### If the workflow fails before deployment starts
+
+Most common causes are:
+
+- the IAM role trust policy does not allow this GitHub repository to assume the OIDC role
+- the EC2 instance is missing Docker, AWS CLI, or SSM connectivity
+- `/opt/gym-tracker/backend/backend.env` does not exist yet
+- the EC2 instance profile cannot pull from the backend ECR repository
+
