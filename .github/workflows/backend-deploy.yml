@@ -102,6 +102,9 @@ jobs:
               'docker ps --filter "name=$CONTAINER_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"',
           ]
 
+          short_sha = image_uri.rsplit(":", 1)[-1][:12]
+          comment = f"Deploy backend {short_sha}"
+          
           send_command = [
               "aws",
               "ssm",
@@ -111,7 +114,7 @@ jobs:
               "--document-name",
               "AWS-RunShellScript",
               "--comment",
-              f"Deploy gym-tracker-backend {image_uri}",
+              comment,
               "--parameters",
               json.dumps({"commands": commands}),
               "--query",
@@ -120,7 +123,11 @@ jobs:
               "text",
           ]
 
-          result = subprocess.run(send_command, check=True, capture_output=True, text=True)
+          result = subprocess.run(send_command, capture_output=True, text=True)
+          if result.returncode != 0:
+              print(result.stdout)
+              print(result.stderr)
+              raise SystemExit(result.returncode)
           command_id = result.stdout.strip()
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as github_output:
               github_output.write(f"command_id={command_id}\n")
