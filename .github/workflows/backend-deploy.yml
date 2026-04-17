@@ -23,6 +23,8 @@ env:
   REMOTE_APP_DIR: "${{ vars.REMOTE_APP_DIR || '/opt/gym-tracker/backend' }}"
   HOST_PORT: "${{ vars.HOST_PORT || '8000' }}"
   CONTAINER_PORT: "${{ vars.CONTAINER_PORT || '8000' }}"
+  BACKEND_ENV_SSM_PARAMETER: "${{ vars.BACKEND_ENV_SSM_PARAMETER || '' }}"
+  BACKEND_ENV_SECRET_ID: "${{ vars.BACKEND_ENV_SECRET_ID || '' }}"
 
 jobs:
   deploy:
@@ -63,7 +65,9 @@ jobs:
           python - <<'PY'
           import json
           import os
+          import shlex
           import subprocess
+          import textwrap
 
           image_uri = os.environ["IMAGE_URI"]
           region = os.environ["AWS_REGION"]
@@ -72,35 +76,177 @@ jobs:
           app_dir = os.environ["REMOTE_APP_DIR"]
           host_port = os.environ["HOST_PORT"]
           container_port = os.environ["CONTAINER_PORT"]
+          env_parameter = os.environ.get("BACKEND_ENV_SSM_PARAMETER", "")
+          env_secret = os.environ.get("BACKEND_ENV_SECRET_ID", "")
           env_file = f"{app_dir}/backend.env"
           registry = image_uri.split("/")[0]
 
-          commands = [
-              "set -euo pipefail",
-              f"APP_DIR={app_dir}",
-              f"ENV_FILE={env_file}",
-              f"CONTAINER_NAME={container_name}",
-              f"IMAGE_URI={image_uri}",
-              f"AWS_REGION={region}",
-              f"ECR_REGISTRY={registry}",
-              f"HOST_PORT={host_port}",
-              f"CONTAINER_PORT={container_port}",
-              'if ! command -v docker >/dev/null 2>&1; then echo "docker is required on the EC2 instance" >&2; exit 1; fi',
-              'if ! command -v aws >/dev/null 2>&1; then echo "aws cli is required on the EC2 instance" >&2; exit 1; fi',
-              'mkdir -p "$APP_DIR"',
-              'if [ ! -f "$ENV_FILE" ]; then echo "Missing $ENV_FILE. Create it from deploy/ec2/backend.env.example before deploying." >&2; exit 1; fi',
-              'aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"',
-              'docker pull "$IMAGE_URI"',
-              'docker run --rm --env-file "$ENV_FILE" "$IMAGE_URI" alembic upgrade head',
-              'docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true',
-              'docker volume create ${CONTAINER_NAME}-logs >/dev/null',
-              'docker volume create ${CONTAINER_NAME}-uploads >/dev/null',
-              'docker run -d --name "$CONTAINER_NAME" --restart unless-stopped --env-file "$ENV_FILE" -p "$HOST_PORT:$CONTAINER_PORT" -v ${CONTAINER_NAME}-logs:/app/app/logs -v ${CONTAINER_NAME}-uploads:/app/app/uploads "$IMAGE_URI"',
-              'docker inspect "$CONTAINER_NAME" --format "{{.State.Status}}" | grep -x running',
-              'healthy=false; for attempt in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do if docker exec "$CONTAINER_NAME" python -c "import json,sys,urllib.request; payload=json.loads(urllib.request.urlopen(\"http://127.0.0.1:${CONTAINER_PORT}/\", timeout=2).read().decode()); sys.exit(0 if payload.get(\"status\") == \"ok\" else 1)"; then healthy=true; break; fi; sleep 2; done; if [ "$healthy" != true ]; then echo "Backend health check failed" >&2; docker logs "$CONTAINER_NAME" --tail 100 >&2; exit 1; fi',
-              'docker image prune -af >/dev/null 2>&1 || true',
-              'docker ps --filter "name=$CONTAINER_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"',
-          ]
+          q = shlex.quote
+          candidate_name = f"{container_name}-candidate"
+          script = textwrap.dedent(
+              f"""\
+              set -euo pipefail
+
+              APP_DIR={q(app_dir)}
+              ENV_FILE={q(env_file)}
+              IMAGE_URI={q(image_uri)}
+              ECR_REGISTRY={q(registry)}
+              AWS_REGION={q(region)}
+              CONTAINER_NAME={q(container_name)}
+              CANDIDATE_NAME={q(candidate_name)}
+              HOST_PORT={q(host_port)}
+              CONTAINER_PORT={q(container_port)}
+              BACKEND_ENV_SSM_PARAMETER={q(env_parameter)}
+              BACKEND_ENV_SECRET_ID={q(env_secret)}
+
+              ROLLOUT_STARTED=false
+
+              health_check() {{
+                local target_container="$1"
+
+                for attempt in $(seq 1 15); do
+                  if docker exec "$target_container" python -c 'import json,sys,urllib.request; payload=json.loads(urllib.request.urlopen("http://127.0.0.1:'"$CONTAINER_PORT"'/", timeout=2).read().decode()); sys.exit(0 if payload.get("status") == "ok" else 1)'; then
+                    return 0
+                  fi
+                  sleep 2
+                done
+
+                return 1
+              }}
+
+              fetch_env_file() {{
+                local tmp_env
+
+                mkdir -p "$APP_DIR"
+                tmp_env="$(mktemp "$APP_DIR/backend.env.tmp.XXXXXX")"
+
+                if [ -n "$BACKEND_ENV_SSM_PARAMETER" ]; then
+                  aws ssm get-parameter \
+                    --name "$BACKEND_ENV_SSM_PARAMETER" \
+                    --with-decryption \
+                    --query 'Parameter.Value' \
+                    --output text > "$tmp_env"
+                elif [ -n "$BACKEND_ENV_SECRET_ID" ]; then
+                  aws secretsmanager get-secret-value \
+                    --secret-id "$BACKEND_ENV_SECRET_ID" \
+                    --query 'SecretString' \
+                    --output text > "$tmp_env"
+                else
+                  echo "Set BACKEND_ENV_SSM_PARAMETER or BACKEND_ENV_SECRET_ID in GitHub Actions repository variables." >&2
+                  rm -f "$tmp_env"
+                  exit 1
+                fi
+
+                if [ ! -s "$tmp_env" ]; then
+                  echo "Fetched backend env file is empty." >&2
+                  rm -f "$tmp_env"
+                  exit 1
+                fi
+
+                chmod 600 "$tmp_env"
+                mv "$tmp_env" "$ENV_FILE"
+              }}
+
+              rollback() {{
+                local exit_code="$1"
+
+                docker rm -f "$CANDIDATE_NAME" >/dev/null 2>&1 || true
+
+                if [ "$ROLLOUT_STARTED" != true ]; then
+                  exit "$exit_code"
+                fi
+
+                if [ -z "$PREVIOUS_IMAGE_ID" ]; then
+                  echo "Deploy failed and no previous image is available for rollback." >&2
+                  exit "$exit_code"
+                fi
+
+                ROLLBACK_IMAGE_LABEL="$PREVIOUS_IMAGE_ID"
+                if [ -n "$PREVIOUS_IMAGE_NAME" ]; then
+                  ROLLBACK_IMAGE_LABEL="$PREVIOUS_IMAGE_NAME"
+                fi
+                echo "Deploy failed. Rolling back to $ROLLBACK_IMAGE_LABEL" >&2
+
+                docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+                docker run -d \
+                  --name "$CONTAINER_NAME" \
+                  --restart unless-stopped \
+                  --env-file "$ENV_FILE" \
+                  -p "$HOST_PORT:$CONTAINER_PORT" \
+                  -v "$CONTAINER_NAME-logs:/app/app/logs" \
+                  -v "$CONTAINER_NAME-uploads:/app/app/uploads" \
+                  "$PREVIOUS_IMAGE_ID"
+
+                if ! health_check "$CONTAINER_NAME"; then
+                  echo "Rollback container failed health check." >&2
+                  docker logs "$CONTAINER_NAME" --tail 100 >&2 || true
+                fi
+
+                exit "$exit_code"
+              }}
+
+              trap 'rollback "$?"' EXIT
+
+              if ! command -v docker >/dev/null 2>&1; then
+                echo "docker is required on the EC2 instance" >&2
+                exit 1
+              fi
+
+              if ! command -v aws >/dev/null 2>&1; then
+                echo "aws cli is required on the EC2 instance" >&2
+                exit 1
+              fi
+
+              fetch_env_file
+
+              PREVIOUS_IMAGE_ID="$(docker inspect "$CONTAINER_NAME" --format '{{{{.Image}}}}' 2>/dev/null || true)"
+              PREVIOUS_IMAGE_NAME="$(docker inspect "$CONTAINER_NAME" --format '{{{{.Config.Image}}}}' 2>/dev/null || true)"
+
+              aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+              docker pull "$IMAGE_URI"
+
+              docker run --rm --env-file "$ENV_FILE" "$IMAGE_URI" alembic upgrade head
+
+              docker volume create "$CONTAINER_NAME-logs" >/dev/null
+              docker volume create "$CONTAINER_NAME-uploads" >/dev/null
+              docker rm -f "$CANDIDATE_NAME" >/dev/null 2>&1 || true
+
+              docker run -d \
+                --name "$CANDIDATE_NAME" \
+                --env-file "$ENV_FILE" \
+                "$IMAGE_URI"
+
+              if ! health_check "$CANDIDATE_NAME"; then
+                echo "Candidate container failed health check." >&2
+                docker logs "$CANDIDATE_NAME" --tail 100 >&2 || true
+                exit 1
+              fi
+
+              ROLLOUT_STARTED=true
+
+              docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+              docker run -d \
+                --name "$CONTAINER_NAME" \
+                --restart unless-stopped \
+                --env-file "$ENV_FILE" \
+                -p "$HOST_PORT:$CONTAINER_PORT" \
+                -v "$CONTAINER_NAME-logs:/app/app/logs" \
+                -v "$CONTAINER_NAME-uploads:/app/app/uploads" \
+                "$IMAGE_URI"
+
+              if ! health_check "$CONTAINER_NAME"; then
+                echo "New production container failed health check." >&2
+                docker logs "$CONTAINER_NAME" --tail 100 >&2 || true
+                exit 1
+              fi
+
+              docker rm -f "$CANDIDATE_NAME" >/dev/null 2>&1 || true
+              trap - EXIT
+
+              docker ps --filter "name=$CONTAINER_NAME" --format "table {{{{.Names}}}}\t{{{{.Status}}}}\t{{{{.Image}}}}"
+              """
+          )
+          commands = script.splitlines()
 
           short_sha = image_uri.rsplit(":", 1)[-1][:12]
           comment = f"Deploy backend {short_sha}"

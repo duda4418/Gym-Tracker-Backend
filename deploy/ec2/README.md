@@ -4,12 +4,12 @@ This directory contains the production backend environment template used by the 
 
 ## Expected EC2 layout
 
-The workflow expects this directory and env file on the instance:
+The workflow creates or refreshes this directory and env file on the instance during deployment:
 
 - `/opt/gym-tracker/backend`
 - `/opt/gym-tracker/backend/backend.env`
 
-Use `backend.env.example` as the template.
+Use `backend.env.example` as the template for the dotenv content stored in AWS.
 
 ## One-time EC2 setup
 
@@ -25,15 +25,23 @@ sudo systemctl start docker
 sudo usermod -aG docker $USER
 ```
 
-Create the application directory and copy the env template:
+Create the application directory:
 
 ```bash
 sudo mkdir -p /opt/gym-tracker/backend
-sudo cp backend.env.example /opt/gym-tracker/backend/backend.env
-sudo chmod 600 /opt/gym-tracker/backend/backend.env
 ```
 
-Then edit `/opt/gym-tracker/backend/backend.env` and set the real values for:
+Store the full dotenv payload from `backend.env.example` in one of these AWS locations:
+
+- an SSM Parameter Store `SecureString`
+- a Secrets Manager secret
+
+Then set exactly one GitHub Actions repository variable:
+
+- `BACKEND_ENV_SSM_PARAMETER`
+- `BACKEND_ENV_SECRET_ID`
+
+The stored dotenv content must contain real values for:
 
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
@@ -57,17 +65,21 @@ The EC2 instance profile should have at least:
 
 - `AmazonSSMManagedInstanceCore`
 - `AmazonEC2ContainerRegistryReadOnly`
+- `ssm:GetParameter` if you use Parameter Store
+- `secretsmanager:GetSecretValue` if you use Secrets Manager
+- `kms:Decrypt` if your parameter or secret uses a customer-managed KMS key
 
 ## What the workflow does
 
-On a push to `main` or `master`, the workflow:
+On a push to `master`, the workflow:
 
 1. assumes the GitHub OIDC role
 2. builds the Docker image from `Dockerfile`
 3. pushes `<sha>` and `latest` tags to ECR
-4. runs `alembic upgrade head` on the EC2 host via SSM
-5. restarts the `gym-tracker-backend` container
-6. verifies the container responds with `{"status": "ok"}` on `GET /`
+4. fetches the full backend dotenv payload from SSM Parameter Store or Secrets Manager and writes it atomically to `/opt/gym-tracker/backend/backend.env`
+5. runs `alembic upgrade head` on the EC2 host via SSM
+6. starts a candidate container and health-checks it before replacing the live container
+7. attempts to roll back to the previous image automatically if the final startup check fails
 
 ## Optional GitHub Actions repository variables
 
@@ -81,6 +93,18 @@ You can override the built-in defaults with these repository variables:
 - `REMOTE_APP_DIR`
 - `HOST_PORT`
 - `CONTAINER_PORT`
+- `BACKEND_ENV_SSM_PARAMETER`
+- `BACKEND_ENV_SECRET_ID`
+
+Set exactly one of `BACKEND_ENV_SSM_PARAMETER` or `BACKEND_ENV_SECRET_ID`.
+
+## Rollback behavior
+
+The workflow keeps the previous backend image reference before it replaces the running container.
+If the final production container fails its startup or `GET /` health check, the workflow attempts to start the previous image automatically.
+
+This rollback only restores the application image.
+It does not revert database schema changes made by `alembic upgrade head`, so production migrations should stay backward-compatible.
 
 ## Manual verification after a deployment
 

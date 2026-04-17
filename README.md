@@ -409,14 +409,14 @@ Once you are comfortable with the local flow, you can extend `alertmanager.yml` 
 
 This repository now includes a production deployment workflow at `.github/workflows/backend-deploy.yml`.
 
-On every push to `master` or `main` (and on manual `workflow_dispatch`), the workflow:
+On every push to `master` (and on manual `workflow_dispatch`), the workflow:
 
 1. assumes the GitHub OIDC role `arn:aws:iam::606008290381:role/gym-tracker-backend-gha-role`
 2. builds the backend Docker image from `Dockerfile`
 3. tags the image with the full commit SHA and also updates `latest`
 4. pushes the image to `606008290381.dkr.ecr.eu-central-1.amazonaws.com/gym-tracker-backend`
 5. sends an AWS Systems Manager command to EC2 instance `i-009bf1df452c9aba3`
-6. pulls the new image on the instance, runs `alembic upgrade head`, restarts the `gym-tracker-backend` container, verifies `GET /` returns `{"status": "ok"}`, and prunes old Docker images
+6. pulls the new image on the instance, fetches the runtime `.env` content from AWS, runs `alembic upgrade head`, stages a candidate container, switches traffic only after health checks pass, and automatically rolls back to the previous image if the final startup check fails
 
 ### Optional GitHub repository variables
 
@@ -430,8 +430,17 @@ The workflow has safe defaults checked into the repo, but you can override them 
 - `REMOTE_APP_DIR`
 - `HOST_PORT`
 - `CONTAINER_PORT`
+- `BACKEND_ENV_SSM_PARAMETER`
+- `BACKEND_ENV_SECRET_ID`
 
 If you do not set them, the workflow defaults to the current production values in AWS and exposes the backend on port `8000`.
+
+Set exactly one of these for backend runtime configuration:
+
+- `BACKEND_ENV_SSM_PARAMETER`: the name of an SSM Parameter Store `SecureString` containing the full dotenv payload
+- `BACKEND_ENV_SECRET_ID`: the ID or ARN of a Secrets Manager secret containing the full dotenv payload
+
+The value stored in AWS should be the full contents of `deploy/ec2/backend.env.example` with real production values filled in.
 
 ### One-time EC2 setup
 
@@ -441,9 +450,9 @@ Before the first deployment, the EC2 instance needs:
 - AWS CLI installed
 - AWS Systems Manager Agent connected
 - the EC2 instance profile with permissions to pull from ECR and receive SSM commands
-- a production env file at `/opt/gym-tracker/backend/backend.env`
+- permission to read either the configured SSM parameter or Secrets Manager secret
 
-Use `deploy/ec2/backend.env.example` as the template for that EC2 env file.
+Use `deploy/ec2/backend.env.example` as the template for the dotenv payload stored in AWS.
 
 Important for `RDS`:
 
@@ -454,7 +463,7 @@ Important for `RDS`:
 
 ### Deployment behavior on EC2
 
-The deployment command expects the env file here:
+The deployment command writes the fetched env file here on the instance:
 
 - `/opt/gym-tracker/backend/backend.env`
 
@@ -474,6 +483,14 @@ The running container name is:
 
 - `gym-tracker-backend`
 
+If a deploy fails after the current container has been replaced, the workflow attempts to start the previous backend image automatically.
+
+Important migration note:
+
+- automatic rollback restores the previous application image only
+- it does **not** roll back database schema changes
+- keep production migrations backward-compatible so the previous image can still run if rollback is needed
+
 ### Verifying a deployment
 
 After the workflow succeeds, verify:
@@ -490,6 +507,7 @@ Most common causes are:
 
 - the IAM role trust policy does not allow this GitHub repository to assume the OIDC role
 - the EC2 instance is missing Docker, AWS CLI, or SSM connectivity
-- `/opt/gym-tracker/backend/backend.env` does not exist yet
+- neither `BACKEND_ENV_SSM_PARAMETER` nor `BACKEND_ENV_SECRET_ID` is configured in GitHub repository variables
+- the configured parameter or secret is missing, empty, or the EC2 instance role cannot read it
 - the EC2 instance profile cannot pull from the backend ECR repository
 
