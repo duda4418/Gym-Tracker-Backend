@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 import json
 import sys
 from dataclasses import dataclass
@@ -13,6 +14,8 @@ from app.db.database import session_scope
 from app.db.models.exercise_secondary_muscles import ExerciseSecondaryMuscle
 from app.db.models.exercises import Exercise
 from app.db.models.muscles import Muscle
+from app.db.models.user_favourite_exercise import UserFavoriteExercise
+from app.db.models.workouts import Workout
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 UPLOADS_DIR = BASE_DIR / "uploads"
@@ -69,14 +72,52 @@ def _map_legacy_muscle_id(legacy_id: str) -> str | None:
     return LEGACY_MUSCLE_ID_TO_NAME.get(legacy_id)
 
 
-def load_exercise_catalog(exercises_json: Path = EXERCISES_JSON) -> tuple[list[ExerciseSeed], list[str]]:
+def _resolve_muscle_reference(reference: str | None, known_muscles: set[str]) -> str | None:
+    if not reference:
+        return None
+
+    legacy_match = _map_legacy_muscle_id(reference)
+    if legacy_match is not None:
+        return legacy_match
+
+    normalized_reference = reference.strip()
+    if not normalized_reference:
+        return None
+
+    known_by_casefold = {muscle.casefold(): muscle for muscle in known_muscles}
+    return known_by_casefold.get(normalized_reference.casefold())
+
+
+def _normalize_pic_key(pic: str | None) -> str | None:
+    if not pic:
+        return None
+
+    path = Path(pic)
+    normalized_stem = path.stem.rstrip("_-")
+    return f"{normalized_stem}{path.suffix.lower()}"
+
+
+def load_exercise_catalog(
+    exercises_json: Path = EXERCISES_JSON,
+    muscles_dir: Path = MUSCLES_DIR,
+) -> tuple[list[ExerciseSeed], list[str]]:
     raw_items = json.loads(exercises_json.read_text(encoding="utf-8"))
+    known_muscles = {muscle.name for muscle in discover_muscles(muscles_dir)}
     exercises: list[ExerciseSeed] = []
     skipped: list[str] = []
 
     for item in raw_items:
-        primary_muscle = _map_legacy_muscle_id(item["muscle_id"])
-        secondary_muscles = [_map_legacy_muscle_id(muscle_id) for muscle_id in item.get("secondary_muscles", [])]
+        primary_reference = item.get("primary_muscle") or item.get("muscle") or item.get("muscle_id")
+        secondary_references = item.get("secondary_muscles", [])
+        if not isinstance(secondary_references, list):
+            skipped.append(item["name"])
+            continue
+
+        primary_muscle = _resolve_muscle_reference(primary_reference, known_muscles)
+        secondary_muscles = [
+            _resolve_muscle_reference(reference, known_muscles)
+            for reference in secondary_references
+        ]
 
         if not primary_muscle or any(name is None for name in secondary_muscles):
             skipped.append(item["name"])
@@ -97,64 +138,209 @@ def load_exercise_catalog(exercises_json: Path = EXERCISES_JSON) -> tuple[list[E
     return exercises, skipped
 
 
+def _find_existing_exercise(
+    exercise_seed: ExerciseSeed,
+    exercises_by_name: dict[str, Exercise],
+    exercises_by_pic: dict[str, Exercise],
+) -> Exercise | None:
+    exercise = exercises_by_name.get(exercise_seed.name)
+    if exercise is not None:
+        return exercise
+
+    normalized_pic = _normalize_pic_key(exercise_seed.pic)
+    if normalized_pic:
+        return exercises_by_pic.get(normalized_pic)
+
+    return None
+
+
+def _merge_duplicate_exercise(session, keeper: Exercise, duplicate: Exercise) -> None:
+    session.query(Workout).filter_by(exercise_id=duplicate.id).update(
+        {Workout.exercise_id: keeper.id},
+        synchronize_session=False,
+    )
+
+    existing_favorites = {
+        favorite.user_id
+        for favorite in session.query(UserFavoriteExercise).filter_by(exercise_id=keeper.id).all()
+    }
+    for favorite in session.query(UserFavoriteExercise).filter_by(exercise_id=duplicate.id).all():
+        if favorite.user_id in existing_favorites:
+            session.delete(favorite)
+            continue
+
+        favorite.exercise_id = keeper.id
+        existing_favorites.add(favorite.user_id)
+
+    existing_secondary_muscles = {
+        link.muscle_id
+        for link in session.query(ExerciseSecondaryMuscle).filter_by(exercise_id=keeper.id).all()
+    }
+    for link in session.query(ExerciseSecondaryMuscle).filter_by(exercise_id=duplicate.id).all():
+        if link.muscle_id in existing_secondary_muscles:
+            session.delete(link)
+            continue
+
+        link.exercise_id = keeper.id
+        existing_secondary_muscles.add(link.muscle_id)
+
+    session.delete(duplicate)
+
+
+def _deduplicate_existing_exercises(session, exercises_to_seed: list[ExerciseSeed]) -> None:
+    preferred_names_by_pic = {
+        _normalize_pic_key(exercise_seed.pic): exercise_seed.name
+        for exercise_seed in exercises_to_seed
+        if _normalize_pic_key(exercise_seed.pic)
+    }
+    exercises_grouped_by_pic: dict[str, list[Exercise]] = defaultdict(list)
+
+    for exercise in session.query(Exercise).all():
+        normalized_pic = _normalize_pic_key(exercise.pic)
+        if normalized_pic:
+            exercises_grouped_by_pic[normalized_pic].append(exercise)
+
+    for pic, duplicates in exercises_grouped_by_pic.items():
+        if len(duplicates) < 2:
+            continue
+
+        preferred_name = preferred_names_by_pic.get(pic)
+        keeper = next((exercise for exercise in duplicates if exercise.name == preferred_name), duplicates[0])
+
+        for duplicate in duplicates:
+            if duplicate.id == keeper.id:
+                continue
+            _merge_duplicate_exercise(session, keeper, duplicate)
+
+
+def _sync_muscles(session, muscles_to_seed: list[MuscleSeed]) -> tuple[dict[str, Muscle], int, int]:
+    muscles_by_name = {muscle.name: muscle for muscle in session.query(Muscle).all()}
+    muscles_created = 0
+    muscles_updated = 0
+
+    for muscle_seed in muscles_to_seed:
+        muscle = muscles_by_name.get(muscle_seed.name)
+        if muscle is None:
+            muscle = Muscle(id=uuid4(), name=muscle_seed.name, pic=muscle_seed.pic)
+            session.add(muscle)
+            session.flush()
+            muscles_by_name[muscle_seed.name] = muscle
+            muscles_created += 1
+        elif muscle.pic != muscle_seed.pic:
+            muscle.pic = muscle_seed.pic
+            muscles_updated += 1
+
+    return muscles_by_name, muscles_created, muscles_updated
+
+
+def _upsert_exercise(
+    session,
+    exercise_seed: ExerciseSeed,
+    primary_muscle: Muscle,
+    exercises_by_name: dict[str, Exercise],
+    exercises_by_pic: dict[str, Exercise],
+) -> tuple[Exercise, bool]:
+    exercise = _find_existing_exercise(exercise_seed, exercises_by_name, exercises_by_pic)
+    if exercise is None:
+        exercise = Exercise(
+            id=uuid4(),
+            name=exercise_seed.name,
+            pic=exercise_seed.pic,
+            tips=exercise_seed.tips,
+            equipment=exercise_seed.equipment,
+            favourite=exercise_seed.favourite,
+            muscle_id=primary_muscle.id,
+        )
+        session.add(exercise)
+        session.flush()
+        exercises_by_name[exercise_seed.name] = exercise
+        normalized_pic = _normalize_pic_key(exercise.pic)
+        if normalized_pic:
+            exercises_by_pic[normalized_pic] = exercise
+        return exercise, True
+
+    previous_name = exercise.name
+    previous_pic = exercise.pic
+    exercise.name = exercise_seed.name
+    exercise.pic = exercise_seed.pic
+    exercise.tips = exercise_seed.tips
+    exercise.equipment = exercise_seed.equipment
+    exercise.favourite = exercise_seed.favourite
+    exercise.muscle_id = primary_muscle.id
+    if previous_name != exercise.name:
+        exercises_by_name.pop(previous_name, None)
+    exercises_by_name[exercise.name] = exercise
+    previous_pic_key = _normalize_pic_key(previous_pic)
+    current_pic_key = _normalize_pic_key(exercise.pic)
+    if previous_pic_key and previous_pic_key != current_pic_key:
+        exercises_by_pic.pop(previous_pic_key, None)
+    if current_pic_key:
+        exercises_by_pic[current_pic_key] = exercise
+    return exercise, False
+
+
+def _sync_secondary_muscle_links(session, exercise: Exercise, secondary_muscles: list[Muscle | None]) -> None:
+    session.query(ExerciseSecondaryMuscle).filter_by(exercise_id=exercise.id).delete()
+    for secondary_muscle in secondary_muscles:
+        if secondary_muscle is not None:
+            session.add(ExerciseSecondaryMuscle(exercise_id=exercise.id, muscle_id=secondary_muscle.id))
+
+
+def _sync_exercises(
+    session,
+    exercises_to_seed: list[ExerciseSeed],
+    muscles_by_name: dict[str, Muscle],
+    skipped_exercises: list[str],
+) -> tuple[int, int]:
+    _deduplicate_existing_exercises(session, exercises_to_seed)
+    session.flush()
+
+    existing_exercises = session.query(Exercise).all()
+    exercises_by_name = {exercise.name: exercise for exercise in existing_exercises}
+    exercises_by_pic = {
+        normalized_pic: exercise
+        for exercise in existing_exercises
+        if (normalized_pic := _normalize_pic_key(exercise.pic)) is not None
+    }
+    exercises_created = 0
+    exercises_updated = 0
+
+    for exercise_seed in exercises_to_seed:
+        primary_muscle = muscles_by_name.get(exercise_seed.primary_muscle)
+        secondary_muscles = [muscles_by_name.get(name) for name in exercise_seed.secondary_muscles]
+        if primary_muscle is None or any(muscle is None for muscle in secondary_muscles):
+            skipped_exercises.append(exercise_seed.name)
+            continue
+
+        exercise, created = _upsert_exercise(
+            session,
+            exercise_seed,
+            primary_muscle,
+            exercises_by_name,
+            exercises_by_pic,
+        )
+        if created:
+            exercises_created += 1
+        else:
+            exercises_updated += 1
+
+        _sync_secondary_muscle_links(session, exercise, secondary_muscles)
+
+    return exercises_created, exercises_updated
+
+
 def seed_from_uploads() -> SeedSummary:
     muscles_to_seed = discover_muscles()
     exercises_to_seed, skipped_exercises = load_exercise_catalog()
 
     with session_scope() as session:
-        muscles_by_name = {muscle.name: muscle for muscle in session.query(Muscle).all()}
-        muscles_created = 0
-        muscles_updated = 0
-
-        for muscle_seed in muscles_to_seed:
-            muscle = muscles_by_name.get(muscle_seed.name)
-            if muscle is None:
-                muscle = Muscle(id=uuid4(), name=muscle_seed.name, pic=muscle_seed.pic)
-                session.add(muscle)
-                session.flush()
-                muscles_by_name[muscle_seed.name] = muscle
-                muscles_created += 1
-            elif muscle.pic != muscle_seed.pic:
-                muscle.pic = muscle_seed.pic
-                muscles_updated += 1
-
-        exercises_by_name = {exercise.name: exercise for exercise in session.query(Exercise).all()}
-        exercises_created = 0
-        exercises_updated = 0
-
-        for exercise_seed in exercises_to_seed:
-            primary_muscle = muscles_by_name.get(exercise_seed.primary_muscle)
-            secondary_muscles = [muscles_by_name.get(name) for name in exercise_seed.secondary_muscles]
-            if primary_muscle is None or any(muscle is None for muscle in secondary_muscles):
-                skipped_exercises.append(exercise_seed.name)
-                continue
-
-            exercise = exercises_by_name.get(exercise_seed.name)
-            if exercise is None:
-                exercise = Exercise(
-                    id=uuid4(),
-                    name=exercise_seed.name,
-                    pic=exercise_seed.pic,
-                    tips=exercise_seed.tips,
-                    equipment=exercise_seed.equipment,
-                    favourite=exercise_seed.favourite,
-                    muscle_id=primary_muscle.id,
-                )
-                session.add(exercise)
-                session.flush()
-                exercises_by_name[exercise_seed.name] = exercise
-                exercises_created += 1
-            else:
-                exercise.pic = exercise_seed.pic
-                exercise.tips = exercise_seed.tips
-                exercise.equipment = exercise_seed.equipment
-                exercise.favourite = exercise_seed.favourite
-                exercise.muscle_id = primary_muscle.id
-                exercises_updated += 1
-
-            session.query(ExerciseSecondaryMuscle).filter_by(exercise_id=exercise.id).delete()
-            for secondary_muscle in secondary_muscles:
-                session.add(ExerciseSecondaryMuscle(exercise_id=exercise.id, muscle_id=secondary_muscle.id))
+        muscles_by_name, muscles_created, muscles_updated = _sync_muscles(session, muscles_to_seed)
+        exercises_created, exercises_updated = _sync_exercises(
+            session,
+            exercises_to_seed,
+            muscles_by_name,
+            skipped_exercises,
+        )
 
     return SeedSummary(
         muscles_created=muscles_created,

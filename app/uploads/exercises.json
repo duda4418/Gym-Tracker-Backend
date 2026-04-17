@@ -1,242 +1,1497 @@
 [
   {
-    "name": "Bench Press (Barbell)",
-    "pic": "00251201-Barbell-Bench-Press_Chest.mp4",
-    "tips": "",
-    "equipment": "Barbell",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
-    ]
-  },
-  {
-    "name": "Bench Press (Cable)",
-    "pic": "01511201-Cable-Bench-Press_Chest.mp4",
-    "tips": "",
-    "equipment": "Machine",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
-    ]
-  },
-  {
-    "name": "Bench Press (Dumbbell)",
-    "pic": "02891201-Dumbbell-Bench-Press_Chest.mp4",
-    "tips": "",
-    "equipment": "Dumbbell",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
-    ]
-  },
-  {
-    "name": "Bench Press (Smith Machine)",
-    "pic": "07481201-Smith-Bench-Press_Chest.mp4",
-    "tips": "",
-    "equipment": "Machine",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
-    ]
-  },
-  {
-    "name": "Butterfly (Pec Deck)",
-    "pic": "10301201-Lever-Pec-Deck-Fly_Chest.mp4",
-    "tips": "",
-    "equipment": "Machine",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": []
-  },
-  {
-    "name": "Cable Fly Crossovers",
-    "pic": "12691201-Cable-Standing-Up-Straight-Crossovers_Chest.mp4",
-    "tips": "",
-    "equipment": "Machine",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": []
-  },
-  {
-    "name": "Chest Dip (Assisted)",
+    "name": "Assisted Chest Dip (kneeling)",
     "pic": "00091201-Assisted-Chest-Dip-(kneeling)_Chest.mp4",
     "tips": "",
     "equipment": "Machine",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": []
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps"
+    ]
   },
   {
-    "name": "Chest Fly (Dumbbell)",
-    "pic": "03081201-Dumbbell-Fly_Chest.mp4",
-    "tips": "",
-    "equipment": "Dumbbell",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": []
-  },
-  {
-    "name": "Chest Fly (Machine)",
-    "pic": "05961201-Lever-Seated-Fly_Chest.mp4",
+    "name": "Assisted Chin up",
+    "pic": "05721301-assisted-chin-up_small.jpg",
     "tips": "",
     "equipment": "Machine",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": []
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
   },
   {
-    "name": "Chest Press (Machine)",
-    "pic": "05771201-Lever-Chest-Press_Chest.mp4",
+    "name": "Assisted Pull up",
+    "pic": "00171201-Assisted-Pull-up_Back.mp4",
     "tips": "",
     "equipment": "Machine",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Assisted Triceps Dip (kneeling)",
+    "pic": "00191201-Assisted-Triceps-Dip-(kneeling)_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": [
+      "Chest"
+    ]
+  },
+  {
+    "name": "Band Face Pull",
+    "pic": "08961101-Band-face-pull_Shoulders_small.jpg",
+    "tips": "",
+    "equipment": "Band",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
     "secondary_muscles": []
   },
   {
-    "name": "Decline Bench Press (Barbell)",
-    "pic": "03011201-Dumbbell-Decline-Bench-Press_Chest.mp4",
+    "name": "Barbell Bench Press",
+    "pic": "00251201-Barbell-Bench-Press_Chest.mp4",
     "tips": "",
     "equipment": "Barbell",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Chest",
     "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa"
+      "Triceps",
+      "Shoulders"
     ]
   },
   {
-    "name": "Decline Bench Press (Dumbbell)",
-    "pic": "13001201-Lever-Decline-Chest-Press_Chest-FIX.mp4",
+    "name": "Barbell Bent Over Row",
+    "pic": "00271201-Barbell-Bent-Over-Row_Back.mp4",
     "tips": "",
-    "equipment": "Dumbbell",
+    "equipment": "Barbell",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Back",
     "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa"
+      "Biceps"
     ]
   },
   {
-    "name": "Decline Chest Fly (Dumbbell)",
-    "pic": "03021201-Dumbbell-Decline-Fly_Chest.mp4",
+    "name": "Barbell Close Grip Bench Press",
+    "pic": "00301201-Barbell-Close-Grip-Bench-Press_Upper-Arms.mp4",
     "tips": "",
-    "equipment": "Dumbbell",
+    "equipment": "Barbell",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Triceps",
+    "secondary_muscles": [
+      "Chest"
+    ]
+  },
+  {
+    "name": "Barbell Curl",
+    "pic": "00311201-Barbell-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
     "secondary_muscles": []
   },
   {
-    "name": "Incline Bench Press (Barbell)",
+    "name": "Barbell Deadlift",
+    "pic": "00321201-Barbell-Deadlift_Hips-FIX.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Lower Back",
+    "secondary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Barbell Decline Close Grip to Skull Press",
+    "pic": "00351101-Barbell-Decline-Close-Grip-To-Skull-Press_Upper-Arms_small.jpg",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Drag Curl",
+    "pic": "00381201-Barbell-Drag-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Front Raise",
+    "pic": "00411101-Barbell-Front-Raise_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Full Squat",
+    "pic": "00431201-Barbell-Full-Squat_Thighs.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Hip Thrust",
+    "pic": "10601101-Barbell-Hip-Thrust_Hips_small.jpg",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Glutes",
+    "secondary_muscles": [
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Barbell Incline Bench Press",
     "pic": "00471201-Barbell-Incline-Bench-Press_Chest.mp4",
     "tips": "",
     "equipment": "Barbell",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Chest",
     "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
+      "Triceps",
+      "Shoulders"
     ]
   },
   {
-    "name": "Incline Bench Press (Dumbbell)",
-    "pic": "03141201-Dumbbell-Incline-Bench-Press_Chest.mp4",
+    "name": "Barbell JM Bench Press",
+    "pic": "00521201-Barbell-JM-Bench-Press_Upper-Arms-FIX_.mp4",
     "tips": "",
-    "equipment": "Dumbbell",
+    "equipment": "Barbell",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Triceps",
     "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
+      "Chest"
     ]
   },
   {
-    "name": "Incline Bench Press (Smith Machine)",
-    "pic": "07571201-Smith-Incline-Bench-Press_Chest.mp4",
+    "name": "Barbell Lunge",
+    "pic": "00541201-Barbell-Lunge_Thighs.mp4",
     "tips": "",
-    "equipment": "Machine",
+    "equipment": "Barbell",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
-    ]
-  },
-  {
-    "name": "Incline Chest Press (Machine)",
-    "pic": "14791201-Lever-Incline-Chest-Press_Chest.mp4",
-    "tips": "",
-    "equipment": "Machine",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
-    ]
-  },
-  {
-    "name": "Incline Push Ups",
-    "pic": "37851201-Incline-Push-Up-(on-box).mp4",
-    "tips": "",
-    "equipment": "None",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Quadriceps",
     "secondary_muscles": []
   },
   {
-    "name": "Low Cable Fly Crossovers",
+    "name": "Barbell Preacher Curl",
+    "pic": "00701201-Barbell-Preacher-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Reverse Curl",
+    "pic": "00801201-Barbell-Reverse-Curl_Forearm.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Forearms",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Barbell Reverse Wrist Curl II",
+    "pic": "00791201-Barbell-Revers-Wrist-Curl-II_Forearms.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Forearms",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Romanian Deadlift (female)",
+    "pic": "22131201-Barbell-Romanian-Deadlift-(female)_Hips.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Lower Back",
+    "secondary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Barbell Seated Overhead Triceps Extension",
+    "pic": "00921201-Barbell-Seated-Overhead-Triceps-Extension_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": [
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Barbell Shrug",
+    "pic": "00951201-Barbell-Shrug_Back.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Traps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Standing Back Wrist Curl",
+    "pic": "01041101-Barbell-Standing-Back-Wrist-Curl_Forearms_small.jpg",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Forearms",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Standing Military Press (without Rack)",
+    "pic": "11651201-Barbell-Standing-Military-Press-(without-rack)_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps"
+    ]
+  },
+  {
+    "name": "Barbell Sumo Squat",
+    "pic": "10631201-Barbell-sumo-squat_Thighs.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Upright Row",
+    "pic": "01211201-Barbell-Upright-Row_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps",
+      "Traps"
+    ]
+  },
+  {
+    "name": "Cable Alternate Triceps Extension",
+    "pic": "01491101-Cable-Alternate-Triceps-Extension_Upper-Arms_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Bar Lateral Pulldown",
+    "pic": "01501201-Cable-Bar-Lateral-Pulldown_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Cable Bench Press",
+    "pic": "01511201-Cable-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Cable Curl",
+    "pic": "01561201-Cable-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Front Raise",
+    "pic": "01621201-Cable-Front-Raise_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Hammer Curl",
+    "pic": "01661201-Cable-Hammer-Curl_Forearm.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Forearms",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Cable Kneeling Crunch",
+    "pic": "01751201-Cable-Kneeling-Crunch_Waist.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Lateral Pulldown with V Bar",
+    "pic": "26161101-Cable-Lateral-Pulldown-with-V-bar_Back_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Cable Lateral Raise",
+    "pic": "01781201-Cable-Lateral-Raise_shoulder.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Low Fly",
     "pic": "01791201-Cable-Low-Fly_Chest.mp4",
     "tips": "",
     "equipment": "Machine",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Chest",
     "secondary_muscles": []
   },
   {
-    "name": "Pullover (Dumbbell)",
-    "pic": "03751201-Dumbbell-Pullover_Chest.mp4",
-    "tips": "",
-    "equipment": "Dumbbell",
-    "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
-    "secondary_muscles": []
-  },
-  {
-    "name": "Pullover (Machine)",
-    "pic": "22851201-Lever-Pullover-(plate-loaded)_Back.mp4",
+    "name": "Cable Low Seated Row",
+    "pic": "01801201-Cable-Low-Seated-Row_Back.mp4",
     "tips": "",
     "equipment": "Machine",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Back",
     "secondary_muscles": [
-      "03632f9c-8581-4a5e-b3da-3451ccb4b2bf"
+      "Biceps"
     ]
   },
   {
-    "name": "Push Up",
-    "pic": "06621201-Push-up-m_Chest.mp4",
+    "name": "Cable Neutral Grip Kickback",
+    "pic": "45661101-Cable-Neutral-Grip-Kickback_Upper-arms_small.jpg",
     "tips": "",
-    "equipment": "None",
+    "equipment": "Machine",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable One Arm Lateral Raise",
+    "pic": "01921201-Cable-One-Arm-Lateral-Raise_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Overhead Curl",
+    "pic": "16361101-Cable-Overhead-Curl_Upper-Arms_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Pushdown",
+    "pic": "02011201-Cable-Pushdown_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Pushdown (with Rope Attachment)",
+    "pic": "02001101-Cable-Pushdown-(with-rope-attachment)_Upper-Arms_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Reverse Grip Straight Back Seated High Row",
+    "pic": "02081201-Cable-Reverse-grip-Straight-Back-Seated-High-Row_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Back",
     "secondary_muscles": [
-      "bf10e3bf-fbdf-470e-bfcf-52b069f58bfa",
-      "e1595911-ce98-478f-a556-5d8961e2c7db"
+      "Biceps"
     ]
   },
   {
-    "name": "Seated Chest Flys (Cable)",
+    "name": "Cable Seated Chest Fly",
     "pic": "38691101-Cable-Seated-Chest-Fly_Chest_small.jpg",
     "tips": "",
     "equipment": "Machine",
     "favourite": false,
-    "muscle_id": "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c",
+    "primary_muscle": "Chest",
     "secondary_muscles": []
+  },
+  {
+    "name": "Cable Seated Row with V Bar",
+    "pic": "26611201-Cable-Seated-Row-with-V-bar_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Back",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Cable Shrug",
+    "pic": "02201201-Cable-Shrug_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Traps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Standing Cross Over High Reverse Fly",
+    "pic": "02251101-Cable-Standing-Cross-over-High-Reverse-Fly_Shoulders_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Standing up Straight Crossovers",
+    "pic": "12691201-Cable-Standing-Up-Straight-Crossovers_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Cable Straight Arm Pulldown",
+    "pic": "02381201-Cable-Straight-Arm-Pulldown_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Cable Upright Row",
+    "pic": "02461201-Cable-Upright-Row_shoulder.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps",
+      "Traps"
+    ]
+  },
+  {
+    "name": "Captain's Chair Leg Raise",
+    "pic": "21261201-Captains-chair-leg-raise_Hips.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Captain's Chair Straight Leg Raise",
+    "pic": "29631101-Captains-Chair-Straight-Leg-Raise_Waist_small.jpg",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Diamond Push up",
+    "pic": "02831101-Diamond-Push-up_Upper-Arms_small.jpg",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Dumbbell Arnold Press II",
+    "pic": "02871201-Dumbbell-Arnold-Press-II_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps"
+    ]
+  },
+  {
+    "name": "Dumbbell Bench Press",
+    "pic": "02891201-Dumbbell-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Dumbbell Bench Seated Press",
+    "pic": "02901201-Dumbbell-Bench-Seated-Press_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps"
+    ]
+  },
+  {
+    "name": "Dumbbell Bent Over Row",
+    "pic": "02931201-Dumbbell-Bent-Over-Row_Back.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Back",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Dumbbell Biceps Curl",
+    "pic": "02941201-Dumbbell-Biceps-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Bulgarian Split Squat (female)",
+    "pic": "22901101-Dumbbell-Bulgarian-Split-Squat-(female)_Thighs_small.jpg",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Concentration Curl",
+    "pic": "02971201-Dumbbell-Concentration-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Decline Bench Press",
+    "pic": "03011201-Dumbbell-Decline-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Dumbbell Decline Fly",
+    "pic": "03021201-Dumbbell-Decline-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Fly",
+    "pic": "03081201-Dumbbell-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Front Raise",
+    "pic": "03101201-Dumbbell-Front-Raise_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Goblet Squat (female)",
+    "pic": "22811201-Dumbbell-Goblet-Squat-(female)_Thighs.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Hammer Curl (version 2)",
+    "pic": "03121201-Dumbbell-Hammer-Curl-(version-2)_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Incline Bench Press",
+    "pic": "03141201-Dumbbell-Incline-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Dumbbell Incline Biceps Curl",
+    "pic": "03151201-Dumbbell-Incline-Biceps-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Kickback",
+    "pic": "03331201-Dumbbell-Kickback_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Lateral Raise",
+    "pic": "03341201-Dumbbell-Lateral-Raise_shoulder.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Lunge",
+    "pic": "03361201-Dumbbell-Lunge_Hips.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Lying Triceps Extension",
+    "pic": "03511101-Dumbbell-Lying-Triceps-Extension_Upper-Arms_small.jpg",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Pullover",
+    "pic": "03751201-Dumbbell-Pullover_Chest.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Lats"
+    ]
+  },
+  {
+    "name": "Dumbbell Rear Delt Fly (female)",
+    "pic": "24871101-Dumbbell-Rear-Delt-Fly-(female)_Shoulders_small.jpg",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Rear Lunge",
+    "pic": "03811201-Dumbbell-Rear-Lunge_Thighs.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Romanian Deadlift",
+    "pic": "14591201-Dumbbell-Romanian-Deadlift_Hips.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Lower Back",
+    "secondary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Dumbbell Seated Lateral Raise",
+    "pic": "03961201-Dumbbell-Seated-Lateral-Raise_shoulder.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Seated Preacher Curl",
+    "pic": "04021201-Dumbbell-Seated-Preacher-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Seated Shoulder Press",
+    "pic": "04051201-Dumbbell-Seated-Shoulder-Press_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps"
+    ]
+  },
+  {
+    "name": "Dumbbell Shrug",
+    "pic": "04061201-Dumbbell-Shrug_Back.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Traps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Split Squat",
+    "pic": "29601201-Dumbbell-Split-Squat_Thighs.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Squat",
+    "pic": "15551101-Dumbbell-Squat_Thighs_small.jpg",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Standing Calf Raise",
+    "pic": "04171201-Dumbbell-Standing-Calf-Raise_Calves.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Calves",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Standing Overhead Press",
+    "pic": "04261201-Dumbbell-Standing-Overhead-Press_shoulder.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps"
+    ]
+  },
+  {
+    "name": "Dumbbell Standing Triceps Extension",
+    "pic": "04301201-Dumbbell-Standing-Triceps-Extension_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Stiff Leg Deadlift",
+    "pic": "04321201-Dumbbell-Stiff-Leg-Deadlift_Waist.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Lower Back",
+    "secondary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Dumbbell Sumo Squat (female)",
+    "pic": "23221201-Dumbbell-Sumo-Squat-(female)_Thighs_.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Dumbbell Upright Row",
+    "pic": "04371201-Dumbbell-Upright-Row_shoulder.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps",
+      "Traps"
+    ]
+  },
+  {
+    "name": "Dumbbell Walking Lunges",
+    "pic": "15571201-Dumbbell-Walking-Lunges_Thighs_.mp4",
+    "tips": "",
+    "equipment": "Dumbbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "EZ Barbell Curl",
+    "pic": "04471201-EZ-Barbell-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Front Plank",
+    "pic": "04631201-Front-Plank-m_waist.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Glute Ham Raise",
+    "pic": "31931101-Glute-Ham-Raise_Thighs_small.jpg",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Hamstrings",
+    "secondary_muscles": [
+      "Glutes"
+    ]
+  },
+  {
+    "name": "Hanging Leg Hip Raise",
+    "pic": "17641201-Hanging-Leg-Hip-Raise_Waist.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Hanging Straight Leg Hip Raise",
+    "pic": "04741201-Hanging-Straight-Leg-Hip-Raise_Waist.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Hyperextension (version 2)",
+    "pic": "18601201-Hyperextension-(VERSION-2)_Hips.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Lower Back",
+    "secondary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Incline Push up (on Box)",
+    "pic": "37851201-Incline-Push-Up-(on-box).mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "L Sit",
+    "pic": "14021201-L-sit_Waist.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Alternate Biceps Curl",
+    "pic": "10321101-Lever-Alternate-Biceps-Curl_Upper-Arms_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Back Extension",
+    "pic": "05731201-Lever-Back-Extension_Waist.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Lower Back",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Bent Over Row with V Bar (plate Loaded)",
+    "pic": "32001201-Lever-Bent-over-Row-with-V-bar-(plate-loaded)_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Back",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Lever Chest Press",
+    "pic": "05771201-Lever-Chest-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Lever Decline Chest Press",
+    "pic": "13001201-Lever-Decline-Chest-Press_Chest-FIX_.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Lever Front Pulldown",
+    "pic": "05791201-Lever-Front-Pulldown_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Lever Full Squat",
+    "pic": "10391101-Lever-Full-Squat_Thighs_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever High Row (plate Loaded)",
+    "pic": "05811101-Lever-High-Row-(plate-loaded)_Back_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Back",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Lever Hip Thrust",
+    "pic": "21461201-Lever-Hip-Thrust_Hips.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Glutes",
+    "secondary_muscles": [
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Lever Incline Chest Press",
+    "pic": "14791201-Lever-Incline-Chest-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Lever Lateral Raise",
+    "pic": "05841201-Lever-Lateral-Raise_shoulder.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Leg Extension",
+    "pic": "05851201-Lever-Leg-Extension_Thighs.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Low Row (plate Loaded)",
+    "pic": "42141201-Lever-Low-Row-(plate-loaded)_Back_.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Back",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Lever Lying Leg Curl",
+    "pic": "05861201-Lever-Lying-Leg-Curl_Thighs.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Hamstrings",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Narrow Grip Seated Row (plate Loaded)",
+    "pic": "05881101-Lever-Narrow-Grip-Seated-Row-(plate-loaded)_Back_small.jpg",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Back",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Lever Pec Deck Fly",
+    "pic": "10301201-Lever-Pec-Deck-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Preacher Curl",
+    "pic": "05921201-Lever-Preacher-Curl_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Biceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Pullover (plate Loaded)",
+    "pic": "22851201-Lever-Pullover-(plate-loaded)_Back_.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Lever Reverse Hyperextension (plate Loaded)",
+    "pic": "05931201-Lever-Reverse-Hyperextension-(plate-loaded)_Hips.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Lower Back",
+    "secondary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Lever Rotary Calf",
+    "pic": "23151201-Lever-Rotary-Calf_Calves.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Calves",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Seated Crunch (chest Pad)",
+    "pic": "05951201-Lever-Seated-Crunch-(chest-pad).mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Seated Dip",
+    "pic": "14511201-Lever-Seated-Dip_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": [
+      "Chest"
+    ]
+  },
+  {
+    "name": "Lever Seated Fly",
+    "pic": "05961201-Lever-Seated-Fly_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Seated Leg Curl",
+    "pic": "05991201-Lever-Seated-Leg-Curl_Thighs.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Hamstrings",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Seated Leg Press",
+    "pic": "22671201-Lever-Seated-Leg-Press_Thighs.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Seated Reverse Fly",
+    "pic": "06021201-Lever-Seated-Reverse-Fly_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Seated Row (version 2)",
+    "pic": "22651201-Lever-Seated-Row-(version-2)_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Back",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Lever Seated Shoulder Press",
+    "pic": "14541201-Lever-Seated-Shoulder-Press_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps"
+    ]
+  },
+  {
+    "name": "Lever Standing Calf Raise",
+    "pic": "06051201-Lever-Standing-Calf-Raise_Calves.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Calves",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lever Standing Rear Kick",
+    "pic": "10371201-Lever-Standing-Rear-Kick_Hips.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Glutes",
+    "secondary_muscles": [
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Lever T Bar Row (plate Loaded)",
+    "pic": "06061201-Lever-T-bar-Row-(plate-loaded)_Back.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Back",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Lever Triceps Extension",
+    "pic": "10331201-Lever-Triceps-Extension_Upper-Arms.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Lying Leg Raise",
+    "pic": "11631201-Lying-Leg-Raise_Waist.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Plate Hyperextension",
+    "pic": "12341101-Plate-Hyperextension_Hips_small.jpg",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Lower Back",
+    "secondary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ]
+  },
+  {
+    "name": "Push up",
+    "pic": "06621201-Push-up-m_Chest.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Seated Palms up Wrist Curl",
+    "pic": "0401-seated-palms-up-wrist-curl.jpg",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Forearms",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Sled 45 Leg Press",
+    "pic": "07391201-Sled-45-Leg-Press_Hips.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Sled Hack Squat",
+    "pic": "07431201-Sled-Hack-Squat_Hips.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Smith Bench Press",
+    "pic": "07481201-Smith-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Smith Calf Raise (version 2)",
+    "pic": "11641201-Smith-Calf-Raise-(version-2)_Calves.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Calves",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Smith Chair Squat",
+    "pic": "07501201-Smith-Chair-Squat_Thighs.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Smith Incline Bench Press",
+    "pic": "07571201-Smith-Incline-Bench-Press_Chest.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Chest",
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ]
+  },
+  {
+    "name": "Smith Standing Shoulder Press",
+    "pic": "12241201-Smith-Standing-Shoulder-Press_Shoulders.mp4",
+    "tips": "",
+    "equipment": "Machine",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": [
+      "Triceps"
+    ]
+  },
+  {
+    "name": "Trap Bar Deadlift",
+    "pic": "08111201-Trap-Bar-Deadlift_Thighs.mp4",
+    "tips": "",
+    "equipment": "Barbell",
+    "favourite": false,
+    "primary_muscle": "Quadriceps",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Weighted Close Grip Chin up on Dip Cage",
+    "pic": "29871101-Weighted-Close-Grip-Chin-up-on-Dip-Cage_Back_small.jpg",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Weighted Decline Crunch",
+    "pic": "21301201-Weighted-decline-crunch_Waist.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Weighted Front Raise",
+    "pic": "08341201-Weighted-Front-Raise_Shoulders.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Shoulders",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Weighted Pull up",
+    "pic": "08411101-Weighted-Pull-Up_back_small.jpg",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Lats",
+    "secondary_muscles": [
+      "Biceps"
+    ]
+  },
+  {
+    "name": "Weighted Russian Twist",
+    "pic": "23711201-Weighted-Russian-Twist_Waist.mp4",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Abs",
+    "secondary_muscles": []
+  },
+  {
+    "name": "Weighted Tricep Dips",
+    "pic": "17551101-Weighted-Tricep-Dips_Upper-Arms_small.jpg",
+    "tips": "",
+    "equipment": "None",
+    "favourite": false,
+    "primary_muscle": "Triceps",
+    "secondary_muscles": [
+      "Chest"
+    ]
   }
 ]
