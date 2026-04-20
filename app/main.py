@@ -97,15 +97,7 @@ async def log_requests(request: Request, call_next):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://192.168.1.11:3000",
-                   "http://localhost:3001", "http://192.168.1.11:3001",
-                   "http://localhost:3002", "http://192.168.1.11:3002",
-                   "http://localhost:3003", "http://192.168.1.11:3003",
-                   "http://localhost:3004", "http://192.168.1.11:3004",
-                   "http://10.11.8.231:3000",
-                   "http://10.11.8.231:3001",
-                   "https://gym-tracker-hempvie8u-davidrotarius-projects.vercel.app",
-                   "https://gym-tracker-topaz.vercel.app"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
