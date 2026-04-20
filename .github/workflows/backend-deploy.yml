@@ -18,7 +18,7 @@ env:
   AWS_REGION: "${{ vars.AWS_REGION || 'eu-central-1' }}"
   AWS_ROLE_ARN: "${{ vars.AWS_ROLE_ARN || 'arn:aws:iam::606008290381:role/gym-tracker-backend-gha-role' }}"
   ECR_REPOSITORY_URI: "${{ vars.ECR_REPOSITORY_URI || '606008290381.dkr.ecr.eu-central-1.amazonaws.com/gym-tracker-backend' }}"
-  EC2_INSTANCE_ID: "${{ vars.EC2_INSTANCE_ID || 'i-009bf1df452c9aba3' }}"
+  EC2_INSTANCE_ID: "${{ vars.EC2_INSTANCE_ID || 'i-0f68f03ec9c6a1330' }}"
   CONTAINER_NAME: "${{ vars.CONTAINER_NAME || 'gym-tracker-backend' }}"
   REMOTE_APP_DIR: "${{ vars.REMOTE_APP_DIR || '/opt/gym-tracker/backend' }}"
   HOST_PORT: "${{ vars.HOST_PORT || '8000' }}"

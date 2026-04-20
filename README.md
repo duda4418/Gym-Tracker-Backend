@@ -415,7 +415,7 @@ On every push to `master` (and on manual `workflow_dispatch`), the workflow:
 2. builds the backend Docker image from `Dockerfile`
 3. tags the image with the full commit SHA and also updates `latest`
 4. pushes the image to `606008290381.dkr.ecr.eu-central-1.amazonaws.com/gym-tracker-backend`
-5. sends an AWS Systems Manager command to EC2 instance `i-009bf1df452c9aba3`
+5. sends an AWS Systems Manager command to EC2 instance `i-0f68f03ec9c6a1330`
 6. pulls the new image on the instance, fetches the runtime `.env` content from AWS, runs `alembic upgrade head`, stages a candidate container, switches traffic only after health checks pass, and automatically rolls back to the previous image if the final startup check fails
 
 ### Optional GitHub repository variables
