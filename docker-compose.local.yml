@@ -1,0 +1,178 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: gym-tracker-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gym_tracker_db
+      POSTGRES_USER: postgres_gym_tracker
+      POSTGRES_PASSWORD: password_gym_tracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_gym_tracker -d gym_tracker_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+    container_name: gym-tracker-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+      pyroscope:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      OTEL_ENABLED: ${OTEL_ENABLED:-true}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-gym-tracker-backend}
+      OTEL_SERVICE_VERSION: ${OTEL_SERVICE_VERSION:-1.0.0}
+      OTEL_ENVIRONMENT: ${OTEL_ENVIRONMENT:-docker}
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://otel-collector:4318/v1/traces}
+      OTEL_EXPORTER_TIMEOUT_SECONDS: ${OTEL_EXPORTER_TIMEOUT_SECONDS:-10}
+      OTEL_TRACES_SAMPLER_RATIO: ${OTEL_TRACES_SAMPLER_RATIO:-1.0}
+      PYROSCOPE_ENABLED: ${PYROSCOPE_ENABLED:-true}
+      PYROSCOPE_SERVER_ADDRESS: ${PYROSCOPE_SERVER_ADDRESS:-http://pyroscope:4040}
+      PYROSCOPE_APPLICATION_NAME: ${PYROSCOPE_APPLICATION_NAME:-gym-tracker-backend}
+      PYROSCOPE_SAMPLE_RATE: ${PYROSCOPE_SAMPLE_RATE:-100}
+      PYROSCOPE_GIL_ONLY: ${PYROSCOPE_GIL_ONLY:-true}
+      PYROSCOPE_ENABLE_LOGGING: ${PYROSCOPE_ENABLE_LOGGING:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOGS_DIR: ${LOGS_DIR:-app/logs}
+      LOG_FILE_NAME: ${LOG_FILE_NAME:-backend.log}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app/uploads:/app/app/uploads
+      - ./app/logs:/app/app/logs
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.123.0
+    container_name: gym-tracker-otel-collector
+    restart: unless-stopped
+    depends_on:
+      - tempo
+    command:
+      - "--config=/etc/otelcol-contrib/config.yaml"
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "13133:13133"
+    volumes:
+      - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml:ro
+
+  tempo:
+    image: grafana/tempo:2.7.2
+    container_name: gym-tracker-tempo
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/tempo/tempo.yml"
+    ports:
+      - "3200:3200"
+    volumes:
+      - ./tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: gym-tracker-loki
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/loki/local-config.yaml"
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+
+  pyroscope:
+    image: grafana/pyroscope:1.12.0
+    container_name: gym-tracker-pyroscope
+    restart: unless-stopped
+    command:
+      - "-target=all"
+      - "-server.http-listen-port=4040"
+      - "-storage.backend=filesystem"
+      - "-storage.filesystem.dir=/var/lib/pyroscope"
+      - "-usage-stats.enabled=false"
+    ports:
+      - "4040:4040"
+    volumes:
+      - pyroscope_data:/var/lib/pyroscope
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: gym-tracker-promtail
+    restart: unless-stopped
+    depends_on:
+      - loki
+      - backend
+    command:
+      - "-config.file=/etc/promtail/config.yml"
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - ./app/logs:/var/log/gym-tracker:ro
+
+  prometheus:
+    image: prom/prometheus
+    container_name: gym-tracker-prometheus
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus:/etc/prometheus/rules:ro
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: gym-tracker-alertmanager
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - /etc/alertmanager/entrypoint.sh
+    environment:
+      ALERTMANAGER_SMARTHOST: ${ALERTMANAGER_SMARTHOST:-smtp.gmail.com:587}
+      ALERTMANAGER_EMAIL_FROM: ${ALERTMANAGER_EMAIL_FROM:-dudadud4418@gmail.com}
+      ALERTMANAGER_EMAIL_TO: ${ALERTMANAGER_EMAIL_TO:-dudadud4418@gmail.com}
+      ALERTMANAGER_AUTH_USERNAME: ${ALERTMANAGER_AUTH_USERNAME:-dudadud4418@gmail.com}
+      ALERTMANAGER_AUTH_PASSWORD: ${ALERTMANAGER_AUTH_PASSWORD:-}
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./alertmanager-entrypoint.sh:/etc/alertmanager/entrypoint.sh:ro
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: gym-tracker-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - alertmanager
+      - tempo
+      - loki
+      - pyroscope
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3005:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+volumes:
+  pgdata:
+  grafana_data:
+  pyroscope_data:
