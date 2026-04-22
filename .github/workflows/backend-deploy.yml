@@ -23,6 +23,8 @@ env:
   REMOTE_APP_DIR: "${{ vars.REMOTE_APP_DIR || '/opt/gym-tracker/backend' }}"
   HOST_PORT: "${{ vars.HOST_PORT || '8000' }}"
   CONTAINER_PORT: "${{ vars.CONTAINER_PORT || '8000' }}"
+  APP_NETWORK: "${{ vars.APP_NETWORK || 'gym-tracker-net' }}"
+  OBSERVABILITY_DIR: "${{ vars.OBSERVABILITY_DIR || '/opt/gym-tracker/observability' }}"
   BACKEND_ENV_SSM_PARAMETER: "${{ vars.BACKEND_ENV_SSM_PARAMETER || '' }}"
   BACKEND_ENV_SECRET_ID: "${{ vars.BACKEND_ENV_SECRET_ID || '' }}"
 
@@ -76,6 +78,8 @@ jobs:
           app_dir = os.environ["REMOTE_APP_DIR"]
           host_port = os.environ["HOST_PORT"]
           container_port = os.environ["CONTAINER_PORT"]
+          app_network = os.environ["APP_NETWORK"]
+          observability_dir = os.environ["OBSERVABILITY_DIR"]
           env_parameter = os.environ.get("BACKEND_ENV_SSM_PARAMETER", "")
           env_secret = os.environ.get("BACKEND_ENV_SECRET_ID", "")
           env_file = f"{app_dir}/backend.env"
@@ -96,6 +100,8 @@ jobs:
               CANDIDATE_NAME={q(candidate_name)}
               HOST_PORT={q(host_port)}
               CONTAINER_PORT={q(container_port)}
+              APP_NETWORK={q(app_network)}
+              OBSERVABILITY_DIR={q(observability_dir)}
               BACKEND_ENV_SSM_PARAMETER={q(env_parameter)}
               BACKEND_ENV_SECRET_ID={q(env_secret)}
 
@@ -147,6 +153,17 @@ jobs:
                 mv "$tmp_env" "$ENV_FILE"
               }}
 
+              ensure_runtime_dependencies() {{
+                docker network create "$APP_NETWORK" >/dev/null 2>&1 || true
+
+                if [ -f "$OBSERVABILITY_DIR/docker-compose.yml" ]; then
+                  (
+                    cd "$OBSERVABILITY_DIR"
+                    docker compose up -d --remove-orphans
+                  )
+                fi
+              }}
+
               rollback() {{
                 local exit_code="$1"
 
@@ -172,6 +189,8 @@ jobs:
                   --name "$CONTAINER_NAME" \
                   --restart unless-stopped \
                   --env-file "$ENV_FILE" \
+                  --network "$APP_NETWORK" \
+                  --network-alias "$CONTAINER_NAME" \
                   -p "$HOST_PORT:$CONTAINER_PORT" \
                   -v "$CONTAINER_NAME-logs:/app/app/logs" \
                   -v "$CONTAINER_NAME-uploads:/app/app/uploads" \
@@ -198,6 +217,7 @@ jobs:
               fi
 
               fetch_env_file
+              ensure_runtime_dependencies
 
               PREVIOUS_IMAGE_ID="$(docker inspect "$CONTAINER_NAME" --format '{{{{.Image}}}}' 2>/dev/null || true)"
               PREVIOUS_IMAGE_NAME="$(docker inspect "$CONTAINER_NAME" --format '{{{{.Config.Image}}}}' 2>/dev/null || true)"
@@ -205,7 +225,7 @@ jobs:
               aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
               docker pull "$IMAGE_URI"
 
-              docker run --rm --env-file "$ENV_FILE" "$IMAGE_URI" alembic upgrade head
+              docker run --rm --env-file "$ENV_FILE" --network "$APP_NETWORK" "$IMAGE_URI" alembic upgrade head
 
               docker volume create "$CONTAINER_NAME-logs" >/dev/null
               docker volume create "$CONTAINER_NAME-uploads" >/dev/null
@@ -214,6 +234,7 @@ jobs:
               docker run -d \
                 --name "$CANDIDATE_NAME" \
                 --env-file "$ENV_FILE" \
+                --network "$APP_NETWORK" \
                 "$IMAGE_URI"
 
               if ! health_check "$CANDIDATE_NAME"; then
@@ -229,6 +250,8 @@ jobs:
                 --name "$CONTAINER_NAME" \
                 --restart unless-stopped \
                 --env-file "$ENV_FILE" \
+                --network "$APP_NETWORK" \
+                --network-alias "$CONTAINER_NAME" \
                 -p "$HOST_PORT:$CONTAINER_PORT" \
                 -v "$CONTAINER_NAME-logs:/app/app/logs" \
                 -v "$CONTAINER_NAME-uploads:/app/app/uploads" \
@@ -250,7 +273,7 @@ jobs:
 
           short_sha = image_uri.rsplit(":", 1)[-1][:12]
           comment = f"Deploy backend {short_sha}"
-          
+
           send_command = [
               "aws",
               "ssm",
@@ -274,6 +297,7 @@ jobs:
               print(result.stdout)
               print(result.stderr)
               raise SystemExit(result.returncode)
+
           command_id = result.stdout.strip()
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as github_output:
               github_output.write(f"command_id={command_id}\n")
@@ -300,4 +324,3 @@ jobs:
             --output text)
 
           test "$STATUS" = "Success"
-
