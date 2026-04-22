@@ -124,6 +124,8 @@ jobs:
                 local tmp_env
 
                 mkdir -p "$APP_DIR"
+                mkdir -p "$APP_DIR/app/logs"
+                mkdir -p "$APP_DIR/app/uploads"
                 tmp_env="$(mktemp "$APP_DIR/backend.env.tmp.XXXXXX")"
 
                 if [ -n "$BACKEND_ENV_SSM_PARAMETER" ]; then
@@ -202,8 +204,8 @@ jobs:
                   --network "$APP_NETWORK" \
                   --network-alias "$CONTAINER_NAME" \
                   -p "$HOST_PORT:$CONTAINER_PORT" \
-                  -v "$CONTAINER_NAME-logs:/app/app/logs" \
-                  -v "$CONTAINER_NAME-uploads:/app/app/uploads" \
+                  -v "$APP_DIR/app/logs:/app/app/logs" \
+                  -v "$APP_DIR/app/uploads:/app/app/uploads" \
                   "$PREVIOUS_IMAGE_ID"
 
                 if ! health_check "$CONTAINER_NAME"; then
@@ -237,14 +239,14 @@ jobs:
 
               docker run --rm --env-file "$ENV_FILE" --network "$APP_NETWORK" "$IMAGE_URI" alembic upgrade head
 
-              docker volume create "$CONTAINER_NAME-logs" >/dev/null
-              docker volume create "$CONTAINER_NAME-uploads" >/dev/null
               docker rm -f "$CANDIDATE_NAME" >/dev/null 2>&1 || true
 
               docker run -d \
                 --name "$CANDIDATE_NAME" \
                 --env-file "$ENV_FILE" \
                 --network "$APP_NETWORK" \
+                -v "$APP_DIR/app/logs:/app/app/logs" \
+                -v "$APP_DIR/app/uploads:/app/app/uploads" \
                 "$IMAGE_URI"
 
               if ! health_check "$CANDIDATE_NAME"; then
@@ -263,8 +265,8 @@ jobs:
                 --network "$APP_NETWORK" \
                 --network-alias "$CONTAINER_NAME" \
                 -p "$HOST_PORT:$CONTAINER_PORT" \
-                -v "$CONTAINER_NAME-logs:/app/app/logs" \
-                -v "$CONTAINER_NAME-uploads:/app/app/uploads" \
+                -v "$APP_DIR/app/logs:/app/app/logs" \
+                -v "$APP_DIR/app/uploads:/app/app/uploads" \
                 "$IMAGE_URI"
 
               if ! health_check "$CONTAINER_NAME"; then
