@@ -154,12 +154,22 @@ jobs:
               }}
 
               ensure_runtime_dependencies() {{
+                local compose_cmd
+
                 docker network create "$APP_NETWORK" >/dev/null 2>&1 || true
 
-                if [ -f "$OBSERVABILITY_DIR/docker-compose.yml" ]; then
+                if docker compose version >/dev/null 2>&1; then
+                  compose_cmd="docker compose"
+                elif command -v docker-compose >/dev/null 2>&1; then
+                  compose_cmd="docker-compose"
+                else
+                  compose_cmd=""
+                fi
+
+                if [ -n "$compose_cmd" ] && [ -f "$OBSERVABILITY_DIR/docker-compose.yml" ]; then
                   (
                     cd "$OBSERVABILITY_DIR"
-                    docker compose up -d --remove-orphans
+                    $compose_cmd up -d --remove-orphans
                   )
                 fi
               }}
