@@ -671,24 +671,23 @@
       },
       "id": 9,
       "options": {
-        "alertInstanceLabelFilter": "job=gym-tracker-backend",
         "dashboardAlerts": false,
         "groupMode": "default",
         "maxItems": 10,
-        "showInactiveAlerts": false,
+        "showInactiveAlerts": true,
         "sortOrder": 1,
         "stateFilter": {
           "alerting": true,
           "firing": true,
-          "no_data": false,
-          "normal": false,
-          "ok": false,
+          "no_data": true,
+          "normal": true,
+          "ok": true,
           "paused": false,
           "pending": true
         },
         "viewMode": "list"
       },
-      "title": "Active Alerts",
+      "title": "Alerts",
       "type": "alertlist"
     },
     {
