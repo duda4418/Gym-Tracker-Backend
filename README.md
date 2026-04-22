@@ -50,7 +50,7 @@ Default values are defined in `docker-compose.yml` and mirrored in `.env.example
 
 ```powershell
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
-docker compose up -d --build
+docker compose -f docker-compose.local.yml up -d --build
 ```
 
 ### OpenTelemetry tracing setup
@@ -272,7 +272,7 @@ Easy test ideas:
 1. Stop the backend container and wait about 1 minute:
 
 ```powershell
-docker compose stop backend
+docker compose -f docker-compose.local.yml stop backend
 ```
 
 2. Check Alertmanager and Prometheus to see the `BackendDown` alert fire.
@@ -281,14 +281,14 @@ docker compose stop backend
 5. Start the backend again:
 
 ```powershell
-docker compose start backend
+docker compose -f docker-compose.local.yml start backend
 ```
 
 If the email does not arrive, inspect the Alertmanager logs:
 
 ```powershell
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
-docker compose logs alertmanager --tail 100
+docker compose -f docker-compose.local.yml logs alertmanager --tail 100
 ```
 
 ### How to test OpenTelemetry locally
@@ -297,7 +297,7 @@ Start or rebuild the backend, collector, Tempo, Loki, and Promtail:
 
 ```powershell
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
-docker compose up -d --build backend otel-collector tempo loki promtail grafana
+docker compose -f docker-compose.local.yml up -d --build backend otel-collector tempo loki promtail grafana
 ```
 
 Check collector health:
@@ -316,7 +316,7 @@ Inspect collector logs for received spans:
 
 ```powershell
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
-docker compose logs otel-collector --tail 100
+docker compose -f docker-compose.local.yml logs otel-collector --tail 100
 ```
 
 Inspect backend logs written for Loki:
@@ -329,7 +329,7 @@ Inspect Promtail logs:
 
 ```powershell
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
-docker compose logs promtail --tail 100
+docker compose -f docker-compose.local.yml logs promtail --tail 100
 ```
 
 Query Loki directly:
@@ -356,7 +356,7 @@ Start or rebuild the backend, Pyroscope, and Grafana:
 
 ```powershell
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
-docker compose up -d --build backend pyroscope grafana
+docker compose -f docker-compose.local.yml up -d --build backend pyroscope grafana
 ```
 
 Check that Pyroscope is reachable:
@@ -398,7 +398,7 @@ Once you are comfortable with the local flow, you can extend `alertmanager.yml` 
 ### Notes
 
 - The backend already exposes Prometheus metrics at `http://localhost:8000/metrics`
-- Prometheus scrapes the backend through the Compose service name `backend:8000`
+- Prometheus scrapes the backend through the Compose service name `backend:8000`, while the emitted Prometheus `job` label is `gym-tracker-backend`
 - Grafana stores state in the named volume `grafana_data`
 - Alertmanager uses Gmail SMTP settings passed through container environment variables
 - OpenTelemetry traces are enabled in Docker Compose and disabled by default outside Docker
