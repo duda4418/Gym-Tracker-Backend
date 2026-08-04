@@ -1,16 +1,26 @@
-from pydantic import BaseModel
+from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 class SignupRequest(BaseModel):
     email: str
-    password: str
-    name: str
+    password: str = Field(min_length=8)
 
 
 class LoginRequest(BaseModel):
     email: str
     password: str
 
+
+class AuthUserResponse(BaseModel):
+    id: UUID
+    email: str
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    user: AuthUserResponse
 
 
 class TokenPairResponse(BaseModel):

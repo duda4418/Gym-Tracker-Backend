@@ -2,7 +2,9 @@ import os
 from time import perf_counter
 
 from fastapi import FastAPI
+from fastapi import HTTPException
 from fastapi import Request
+from fastapi.exceptions import RequestValidationError
 from opentelemetry import trace
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -14,7 +16,6 @@ from app.api.routers.muscles import muscles_router
 from app.api.routers.exercises import exercises_router
 from app.api.routers.splits import splits_router
 from app.api.routers.users import qrcode_router
-from app.api.routers.workout_sessions import workout_sessions_router
 from app.api.routers.workouts import workouts_router
 from app.api.routers.favourites import favorites_router
 from app.core.config import get_settings
@@ -33,12 +34,48 @@ configure_profiling(settings)
 logger = get_app_logger()
 app = FastAPI()
 
+ERROR_CODES = {
+    400: "BAD_REQUEST",
+    401: "UNAUTHORIZED",
+    403: "FORBIDDEN",
+    404: "NOT_FOUND",
+    409: "CONFLICT",
+}
+
 Instrumentator().instrument(app).expose(app)
 configure_telemetry(app, settings)
 
 @app.exception_handler(DatabaseUnavailableError)
 async def handle_database_unavailable(_, exc: DatabaseUnavailableError):
-    return JSONResponse(status_code=503, content={"detail": exc.detail})
+    return JSONResponse(
+        status_code=503,
+        content={"error": {"code": "DATABASE_UNAVAILABLE", "message": exc.detail}},
+    )
+
+
+@app.exception_handler(HTTPException)
+async def handle_http_exception(_, exc: HTTPException):
+    message = exc.detail if isinstance(exc.detail, str) else "Request failed"
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": ERROR_CODES.get(exc.status_code, "REQUEST_ERROR"),
+                "message": message,
+            }
+        },
+        headers=exc.headers,
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def handle_validation_error(_, exc: RequestValidationError):
+    first_error = exc.errors()[0] if exc.errors() else None
+    message = first_error["msg"] if first_error else "Invalid request"
+    return JSONResponse(
+        status_code=400,
+        content={"error": {"code": "VALIDATION_ERROR", "message": message}},
+    )
 
 os.makedirs(settings.UPLOADS_DIR, exist_ok=True)
 
@@ -110,7 +147,6 @@ app.include_router(muscles_router)
 app.include_router(exercises_router)
 app.include_router(splits_router)
 app.include_router(workouts_router)
-app.include_router(workout_sessions_router)
 app.include_router(auth_router)
 app.include_router(qrcode_router)
 app.include_router(favorites_router)

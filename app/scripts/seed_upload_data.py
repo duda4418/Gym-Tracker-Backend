@@ -15,7 +15,7 @@ from app.db.models.exercise_secondary_muscles import ExerciseSecondaryMuscle
 from app.db.models.exercises import Exercise
 from app.db.models.muscles import Muscle
 from app.db.models.user_favourite_exercise import UserFavoriteExercise
-from app.db.models.workouts import Workout
+from app.db.models.workout_exercises import WorkoutExercise
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 UPLOADS_DIR = BASE_DIR / "uploads"
@@ -155,8 +155,8 @@ def _find_existing_exercise(
 
 
 def _merge_duplicate_exercise(session, keeper: Exercise, duplicate: Exercise) -> None:
-    session.query(Workout).filter_by(exercise_id=duplicate.id).update(
-        {Workout.exercise_id: keeper.id},
+    session.query(WorkoutExercise).filter_by(exercise_id=duplicate.id).update(
+        {WorkoutExercise.exercise_id: keeper.id},
         synchronize_session=False,
     )
 

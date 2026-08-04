@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_auth_service, get_current_user
 from app.schemas.auth import (
+    AuthResponse,
     LoginRequest,
     LogoutRequest,
     RefreshTokenRequest,
@@ -14,12 +15,12 @@ from app.services.auth_service import AuthService
 auth_router = APIRouter(tags=["Authentication"])
 
 
-@auth_router.post("/auth/signup", response_model=UserResponse, status_code=201)
+@auth_router.post("/auth/signup", response_model=AuthResponse, status_code=201)
 async def signup(user_data: SignupRequest, auth_service: AuthService = Depends(get_auth_service)):
-    return await auth_service.signup(user_data.email, user_data.password, user_data.name)
+    return await auth_service.signup(user_data.email, user_data.password)
 
 
-@auth_router.post("/auth/login", response_model=TokenPairResponse)
+@auth_router.post("/auth/login", response_model=AuthResponse)
 async def login(user_data: LoginRequest, auth_service: AuthService = Depends(get_auth_service)):
     return await auth_service.login(user_data.email, user_data.password)
 

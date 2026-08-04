@@ -4,7 +4,7 @@ from uuid import uuid4
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.db.models import Exercise, Muscle, SplitMuscle, Workout
+from app.db.models import Exercise, Muscle, SplitMuscle, WorkoutExercise, WorkoutSession
 from app.db.models.splits import Split
 
 
@@ -23,10 +23,11 @@ class SplitRepository:
         today_start = now_utc.replace(hour=0, minute=0, second=0, microsecond=0)
 
         rows = (
-            self.session.query(Exercise.muscle_id, func.count(Workout.id).label("count"))
-            .join(Workout, Workout.exercise_id == Exercise.id)
-            .filter(Workout.user_id == user_id)
-            .filter(Workout.date >= today_start)
+            self.session.query(Exercise.muscle_id, func.count(WorkoutExercise.id).label("count"))
+            .join(WorkoutExercise, WorkoutExercise.exercise_id == Exercise.id)
+            .join(WorkoutSession, WorkoutSession.id == WorkoutExercise.workout_session_id)
+            .filter(WorkoutSession.user_id == user_id)
+            .filter(WorkoutSession.started_at >= today_start)
             .group_by(Exercise.muscle_id)
             .all()
         )
@@ -63,6 +64,19 @@ class SplitRepository:
             nr_of_exercises=nr_of_exercises,
         )
         self.session.add(split_muscle)
+
+    def replace_split_muscles(self, split_id, muscles) -> None:
+        self.session.query(SplitMuscle).filter(SplitMuscle.split_id == split_id).delete()
+        for muscle in muscles:
+            self.add_split_muscle(split_id, muscle.muscle_id, muscle.nr_of_exercises)
+
+    def update(self, split, name: str, pic: str | None, muscles):
+        split.name = name
+        split.pic = pic
+        self.replace_split_muscles(split.id, muscles)
+        self.session.commit()
+        self.session.refresh(split)
+        return split
 
     def delete_split(self, split):
         self.session.query(SplitMuscle).filter(SplitMuscle.split_id == split.id).delete()

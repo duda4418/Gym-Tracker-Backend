@@ -7,18 +7,7 @@ from alembic import context
 
 from app.core.config import get_settings
 from app.db.database import Base
-from app.db.models import (
-    exercise_secondary_muscles,
-    exercises,
-    muscles,
-    split_muscle,
-    splits,
-    user_favourite_exercise,
-    users,
-    workout_session_muscle,
-    workout_sessions,
-    workouts,
-)
+import app.db.models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

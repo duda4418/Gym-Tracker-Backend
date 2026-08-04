@@ -4,7 +4,7 @@ A clean FastAPI backend for a gym tracking app. It handles authentication, exerc
 
 ## Main features
 
-- JWT auth with access + refresh tokens
+- JWT authentication
 - Exercise and muscle management
 - Workout splits and workout sessions
 - Workout logging and history
@@ -62,12 +62,15 @@ Gym-Tracker-Backend/
 
 Copy `.env.example` to `.env` and update the values you need.
 
-### 2. Run with Docker
+### 2. Run locally with Docker
 
 ```powershell
 cd C:\Users\daserban\PycharmProjects\Gym-Tracker-Backend
-docker compose -f docker-compose.local.yml up -d --build
+docker compose -f docker-compose.local.yml up -d --build postgres backend
 ```
+
+The backend container applies Alembic migrations before starting. The
+observability services are optional and are not required for local API work.
 
 Backend: `http://localhost:8000`
 
@@ -83,8 +86,7 @@ Backend: `http://localhost:8000`
 - `muscles` - create and list muscles
 - `exercises` - create, list, bulk import, filter by muscle
 - `splits` - manage training splits
-- `workouts` - log and review workouts
-- `workout_sessions` - manage grouped training sessions
+- `workouts` - start sessions, add exercises and sets, and review history
 - `favorites` - save favorite exercises
 - `users` - QR code upload and retrieval
 

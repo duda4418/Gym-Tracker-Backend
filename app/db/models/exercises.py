@@ -16,8 +16,7 @@ class Exercise(Base):
 
     muscle_id = Column(UUID(as_uuid=True), ForeignKey("muscles.id"), nullable=False)
 
-    # ✅ Relationships
     muscle = relationship("Muscle", back_populates="exercises")
-    workouts = relationship("Workout", back_populates="exercise", cascade="all, delete-orphan")
+    workout_exercises = relationship("WorkoutExercise", back_populates="exercise")
     secondary_muscles = relationship("ExerciseSecondaryMuscle", back_populates="exercise", cascade="all, delete-orphan")
     favorited_by = relationship("UserFavoriteExercise", back_populates="exercise", cascade="all, delete-orphan")

@@ -1,6 +1,6 @@
 from uuid import UUID
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class ExerciseCreate(BaseModel):
     name: str
@@ -9,11 +9,12 @@ class ExerciseCreate(BaseModel):
     equipment: Optional[str]
     favourite: bool = False
     muscle_id: UUID  # ✅ Primary muscle
-    secondary_muscles: List[UUID] = []  # ✅ List of secondary muscle IDs
+    secondary_muscles: List[UUID] = Field(default_factory=list)
 
 class ExerciseResponse(BaseModel):
     id: UUID
     name: str
+    muscle_id: UUID
     pic: Optional[str]
     tips: Optional[str]
     equipment: Optional[str]
@@ -27,4 +28,8 @@ class ExerciseBulkCreate(BaseModel):
 class ExerciseSecondaryMuscleResponse(BaseModel):
     muscle_id: UUID
     name: str
+
+
+class FavoriteCreate(BaseModel):
+    exercise_id: UUID
 

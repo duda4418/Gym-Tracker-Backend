@@ -11,7 +11,6 @@ from app.repositories.qr_repository import QRRepository
 from app.repositories.split_repository import SplitRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.workout_repository import WorkoutRepository
-from app.repositories.workout_session_repository import WorkoutSessionRepository
 from app.schemas.users import AuthenticatedUser
 from app.services.auth_service import AuthService
 from app.services.exercise_service import ExerciseService
@@ -20,7 +19,6 @@ from app.services.muscle_service import MuscleService
 from app.services.qr_service import QRService
 from app.services.split_service import SplitService
 from app.services.workout_service import WorkoutService
-from app.services.workout_session_service import WorkoutSessionService
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -57,13 +55,10 @@ def get_split_service(session: Session = Depends(get_db_session)) -> SplitServic
 
 
 def get_workout_service(session: Session = Depends(get_db_session)) -> WorkoutService:
-    return WorkoutService(WorkoutRepository(session), UserRepository(session), ExerciseRepository(session))
-
-
-def get_workout_session_service(session: Session = Depends(get_db_session)) -> WorkoutSessionService:
-    return WorkoutSessionService(
-        WorkoutSessionRepository(session),
-        MuscleRepository(session),
+    return WorkoutService(
+        WorkoutRepository(session),
+        UserRepository(session),
+        ExerciseRepository(session),
         SplitRepository(session),
     )
 
@@ -72,7 +67,6 @@ def get_favorite_service(session: Session = Depends(get_db_session)) -> Favorite
     return FavoriteService(
         FavoriteRepository(session),
         ExerciseRepository(session),
-        MuscleRepository(session),
         UserRepository(session),
     )
 

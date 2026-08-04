@@ -16,7 +16,6 @@ class User(Base):
     refresh_token_hash = Column(String, nullable=True)
     refresh_token_expires_at = Column(DateTime(timezone=True), nullable=True)
 
-    workout_sessions = relationship("WorkoutSession", back_populates="user")
-    workouts = relationship("Workout", back_populates="user", cascade="all, delete-orphan")
+    workout_sessions = relationship("WorkoutSession", back_populates="user", cascade="all, delete-orphan")
     splits = relationship("Split", back_populates="user", cascade="all, delete-orphan")
     favorite_exercises = relationship("UserFavoriteExercise", back_populates="user", cascade="all, delete-orphan")

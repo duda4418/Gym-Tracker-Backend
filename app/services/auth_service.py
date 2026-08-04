@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import HTTPException
 import jwt
 
-from app.schemas.auth import TokenPairResponse
+from app.schemas.auth import AuthResponse, AuthUserResponse, TokenPairResponse
 from app.schemas.users import AuthenticatedUser, UserResponse
 from app.repositories.auth_repository import AuthRepository
 from app.utils.auth import (
@@ -23,21 +23,21 @@ class AuthService:
     def __init__(self, repo: AuthRepository) -> None:
         self.repo = repo
 
-    async def signup(self, email: str, password: str, name: str) -> UserResponse:
+    async def signup(self, email: str, password: str) -> AuthResponse:
         existing = self.repo.get_by_email(email)
         if existing:
             raise HTTPException(status_code=400, detail="Email already registered")
 
         password_hash = hash_password(password)
-        user = self.repo.create_user(email=email, name=name, password_hash=password_hash)
-        return UserResponse(id=user.id, email=user.email, name=user.name)
+        user = self.repo.create_user(email=email, name=None, password_hash=password_hash)
+        return self._auth_response(user)
 
-    async def login(self, email: str, password: str) -> TokenPairResponse:
+    async def login(self, email: str, password: str) -> AuthResponse:
         user = self.repo.get_by_email(email)
         if not user or not verify_password(password, user.password_hash):
             raise HTTPException(status_code=401, detail="Invalid email or password")
 
-        return self._issue_tokens(user)
+        return self._auth_response(user)
 
     async def refresh_tokens(self, refresh_token: str) -> TokenPairResponse:
         user = self._get_user_from_token(refresh_token, expected_type=REFRESH_TOKEN_TYPE)
@@ -86,6 +86,13 @@ class AuthService:
             access_token=access_token,
             refresh_token=refresh_token,
             token_type="bearer",
+        )
+
+    @staticmethod
+    def _auth_response(user) -> AuthResponse:
+        return AuthResponse(
+            access_token=create_access_token(str(user.id)),
+            user=AuthUserResponse(id=user.id, email=user.email),
         )
 
     def _get_user_from_token(self, token: str, expected_type: str | None = None):

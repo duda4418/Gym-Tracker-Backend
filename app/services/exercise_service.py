@@ -28,6 +28,7 @@ class ExerciseService:
         return ExerciseResponse(
             id=exercise.id,
             name=exercise.name,
+            muscle_id=exercise.muscle_id,
             pic=f"/uploads/exercises/{exercise.pic}" if exercise.pic else None,
             tips=exercise.tips,
             equipment=exercise.equipment,
