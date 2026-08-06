@@ -3,15 +3,6 @@ from __future__ import annotations
 from threading import Lock
 
 from fastapi import FastAPI
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 
 from app.core.config import Settings
 from app.db.database import engine
@@ -26,6 +17,16 @@ def configure_telemetry(app: FastAPI, settings: Settings) -> None:
 
     if not settings.OTEL_ENABLED:
         return
+
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.instrumentation.requests import RequestsInstrumentor
+    from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+    from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 
     with _telemetry_lock:
         if _telemetry_configured:

@@ -16,6 +16,7 @@ from app.services.auth_service import AuthService
 from app.services.exercise_service import ExerciseService
 from app.services.favorite_service import FavoriteService
 from app.services.muscle_service import MuscleService
+from app.services.profile_service import ProfileService
 from app.services.qr_service import QRService
 from app.services.split_service import SplitService
 from app.services.workout_service import WorkoutService
@@ -73,3 +74,7 @@ def get_favorite_service(session: Session = Depends(get_db_session)) -> Favorite
 
 def get_qr_service(session: Session = Depends(get_db_session)) -> QRService:
     return QRService(QRRepository(session))
+
+
+def get_profile_service(session: Session = Depends(get_db_session)) -> ProfileService:
+    return ProfileService(UserRepository(session))

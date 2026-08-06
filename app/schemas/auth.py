@@ -16,6 +16,7 @@ class LoginRequest(BaseModel):
 class AuthUserResponse(BaseModel):
     id: UUID
     email: str
+    profile_pic: str | None = None
 
 
 class AuthResponse(BaseModel):

@@ -1,0 +1,10 @@
+fastapi
+sqlalchemy
+psycopg[binary]
+pydantic-settings
+python-multipart
+PyJWT
+passlib
+bcrypt
+mangum
+opentelemetry-api

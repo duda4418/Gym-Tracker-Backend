@@ -6,7 +6,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Query, Response
 
 from app.api.dependencies import get_current_user, get_exercise_service, get_workout_service
-from app.schemas.exercises import ExerciseCreate, ExerciseResponse, ExerciseBulkCreate
+from app.schemas.exercises import ExerciseBulkCreate, ExerciseCreate, ExerciseResponse, ExerciseUpdate
 from app.schemas.users import AuthenticatedUser
 from app.schemas.workouts import ExerciseHistoryResponse, LastSetResponse
 from app.services.exercise_service import ExerciseService
@@ -56,6 +56,15 @@ async def get_last_exercise_set(
 @exercises_router.post("/exercises", response_model=ExerciseResponse, status_code=201)
 async def create_exercise(data: ExerciseCreate, exercise_service: ExerciseService = Depends(get_exercise_service)):
     return await exercise_service.create_exercise(data)
+
+
+@exercises_router.patch("/exercises/{exercise_id}", response_model=ExerciseResponse)
+async def update_exercise(
+    exercise_id: UUID,
+    data: ExerciseUpdate,
+    exercise_service: ExerciseService = Depends(get_exercise_service),
+):
+    return await exercise_service.update_exercise(exercise_id, data)
 
 
 @exercises_router.post("/exercises/bulk", response_model=List[ExerciseResponse], status_code=201)

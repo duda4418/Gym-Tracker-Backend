@@ -24,6 +24,7 @@ migrations/__pycache__/
 
 # Test outputs
 *.log
+build/
 
 # Supabase
 .supabase/

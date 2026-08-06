@@ -7,9 +7,9 @@ from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from opentelemetry import trace
 from fastapi.responses import JSONResponse
+from mangum import Mangum
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
-from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api.routers.auth import auth_router
 from app.api.routers.muscles import muscles_router
@@ -42,7 +42,10 @@ ERROR_CODES = {
     409: "CONFLICT",
 }
 
-Instrumentator().instrument(app).expose(app)
+if settings.METRICS_ENABLED:
+    from prometheus_fastapi_instrumentator import Instrumentator
+
+    Instrumentator().instrument(app).expose(app)
 configure_telemetry(app, settings)
 
 @app.exception_handler(DatabaseUnavailableError)
@@ -77,7 +80,8 @@ async def handle_validation_error(_, exc: RequestValidationError):
         content={"error": {"code": "VALIDATION_ERROR", "message": message}},
     )
 
-os.makedirs(settings.UPLOADS_DIR, exist_ok=True)
+if settings.SERVE_LOCAL_UPLOADS:
+    os.makedirs(settings.UPLOADS_DIR, exist_ok=True)
 
 
 @app.middleware("http")
@@ -134,14 +138,15 @@ async def log_requests(request: Request, call_next):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins,
+    allow_origin_regex=settings.CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Serve uploaded images as static files
-app.mount("/uploads", StaticFiles(directory=settings.UPLOADS_DIR), name="uploads")
+if settings.SERVE_LOCAL_UPLOADS:
+    app.mount("/uploads", StaticFiles(directory=settings.UPLOADS_DIR), name="uploads")
 
 app.include_router(muscles_router)
 app.include_router(exercises_router)
@@ -154,3 +159,6 @@ app.include_router(favorites_router)
 @app.get("/")
 def health_check():
     return {"status": "ok"}
+
+
+handler = Mangum(app, lifespan="off")

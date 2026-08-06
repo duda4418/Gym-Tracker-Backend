@@ -7,6 +7,7 @@ class UserResponse(BaseModel):
     id: UUID
     email: str
     name: str | None = None
+    profile_pic: str | None = None
 
 
 class AuthenticatedUser(UserResponse):

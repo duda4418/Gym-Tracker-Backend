@@ -1,12 +1,8 @@
-import os
-
 from fastapi import HTTPException, UploadFile
 
-from app.core.config import get_settings
 from app.repositories.qr_repository import QRRepository
 
-BUCKET_NAME = "qrcodes"
-settings = get_settings()
+QR_IMAGE_URL = "/users/qr-image"
 
 
 class QRService:
@@ -26,25 +22,15 @@ class QRService:
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        file_extension = os.path.splitext(file.filename)[1].lower() if file.filename else ".png"
-        if not file_extension:
-            file_extension = ".png"
-
-        storage_dir = os.path.join(settings.UPLOADS_DIR, BUCKET_NAME, str(user.id))
-        os.makedirs(storage_dir, exist_ok=True)
-        storage_path = os.path.join(storage_dir, f"qrcode{file_extension}")
-
         try:
-            with open(storage_path, "wb") as f:
-                f.write(contents)
-
-            public_url = f"/uploads/{BUCKET_NAME}/{user.id}/qrcode{file_extension}"
-            user.qr_code = public_url
+            user.qr_code = QR_IMAGE_URL
+            user.qr_code_data = contents
+            user.qr_code_content_type = file.content_type
             self.repo.save(user)
             return {
                 "success": True,
                 "message": "QR code uploaded successfully",
-                "qr_code_url": public_url,
+                "qr_code_url": QR_IMAGE_URL,
             }
         except Exception as exc:
             raise HTTPException(status_code=500, detail=f"Failed to upload QR code: {str(exc)}")
@@ -53,30 +39,30 @@ class QRService:
         user = self.repo.get_user_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        if not user.qr_code:
+        if not user.qr_code_data:
             raise HTTPException(status_code=404, detail="No QR code found for this user")
-        return {"qr_code_url": user.qr_code}
+        return {"qr_code_url": QR_IMAGE_URL}
+
+    async def get_qr_image(self, user_id):
+        user = self.repo.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        if not user.qr_code_data or not user.qr_code_content_type:
+            raise HTTPException(status_code=404, detail="No QR code found for this user")
+        return user.qr_code_data, user.qr_code_content_type
 
     async def delete_qr(self, user_id):
         user = self.repo.get_user_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        if not user.qr_code:
+        if not user.qr_code_data:
             raise HTTPException(status_code=404, detail="No QR code found for this user")
 
         try:
-            relative_path = user.qr_code.replace("/uploads/", "")
-            absolute_path = os.path.join(settings.UPLOADS_DIR, relative_path)
-            if os.path.exists(absolute_path):
-                os.remove(absolute_path)
-
             user.qr_code = None
+            user.qr_code_data = None
+            user.qr_code_content_type = None
             self.repo.save(user)
             return {"success": True, "message": "QR code deleted successfully"}
         except Exception as exc:
-            user.qr_code = None
-            self.repo.save(user)
-            return {
-                "success": False,
-                "message": f"Failed to delete file, but database updated: {str(exc)}",
-            }
+            raise HTTPException(status_code=500, detail=f"Failed to delete QR code: {str(exc)}")

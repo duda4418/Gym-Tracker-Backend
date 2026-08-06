@@ -117,6 +117,43 @@ def test_create_exercise(client):
     assert response.status_code == 201
 
 
+def test_update_exercise(client):
+    exercise_id = uuid4()
+    muscle_id = uuid4()
+
+    class Service:
+        async def update_exercise(self, requested_id, data):
+            assert requested_id == exercise_id
+            assert data.name == "Incline Dumbbell Press"
+            assert data.exercise_type == "weighted"
+            return {
+                "id": str(exercise_id),
+                "name": data.name,
+                "muscle_id": str(muscle_id),
+                "pic": None,
+                "tips": None,
+                "equipment": "dumbbells",
+                "exercise_type": data.exercise_type,
+                "favourite": False,
+                "primary_muscle": "Chest",
+                "secondary_muscles": ["Triceps"],
+            }
+
+    client.app.dependency_overrides[deps.get_exercise_service] = lambda: Service()
+    response = client.patch(
+        f"/exercises/{exercise_id}",
+        json={
+            "name": "Incline Dumbbell Press",
+            "equipment": "dumbbells",
+            "exercise_type": "weighted",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["name"] == "Incline Dumbbell Press"
+    assert response.json()["exercise_type"] == "weighted"
+
+
 def test_create_exercises_bulk(client):
     muscle_id = uuid4()
 
@@ -282,6 +319,21 @@ def test_get_qr(client):
     assert response.status_code == 200
 
 
+def test_get_qr_image(client):
+    class Service:
+        async def get_qr_image(self, _):
+            return b"png-data", "image/png"
+
+    client.app.dependency_overrides[deps.get_current_user] = lambda: _obj(id="auth-user-1")
+    client.app.dependency_overrides[deps.get_qr_service] = lambda: Service()
+    response = client.get("/users/qr-image")
+
+    assert response.status_code == 200
+    assert response.content == b"png-data"
+    assert response.headers["content-type"] == "image/png"
+    assert response.headers["cache-control"] == "private, no-store"
+
+
 def test_delete_qr(client):
     class Service:
         async def delete_qr(self, _):
@@ -290,6 +342,52 @@ def test_delete_qr(client):
     client.app.dependency_overrides[deps.get_current_user] = lambda: _obj(id="auth-user-1")
     client.app.dependency_overrides[deps.get_qr_service] = lambda: Service()
     response = client.delete("/users/delete-qr")
+    assert response.status_code == 200
+
+
+def test_upload_profile_picture(client):
+    class Service:
+        async def upload_profile_picture(self, *_):
+            return {
+                "success": True,
+                "message": "Profile picture uploaded successfully",
+                "profile_pic": "/users/profile-picture",
+            }
+
+    client.app.dependency_overrides[deps.get_current_user] = lambda: _obj(id="auth-user-1")
+    client.app.dependency_overrides[deps.get_profile_service] = lambda: Service()
+    response = client.post(
+        "/users/profile-picture",
+        files={"file": ("profile.webp", b"webp", "image/webp")},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["profile_pic"] == "/users/profile-picture"
+
+
+def test_get_profile_picture(client):
+    class Service:
+        async def get_profile_picture(self, _):
+            return b"image-data", "image/png"
+
+    client.app.dependency_overrides[deps.get_current_user] = lambda: _obj(id="auth-user-1")
+    client.app.dependency_overrides[deps.get_profile_service] = lambda: Service()
+    response = client.get("/users/profile-picture")
+
+    assert response.status_code == 200
+    assert response.content == b"image-data"
+    assert response.headers["content-type"] == "image/png"
+
+
+def test_delete_profile_picture(client):
+    class Service:
+        async def delete_profile_picture(self, _):
+            return {"success": True, "message": "Profile picture deleted successfully"}
+
+    client.app.dependency_overrides[deps.get_current_user] = lambda: _obj(id="auth-user-1")
+    client.app.dependency_overrides[deps.get_profile_service] = lambda: Service()
+    response = client.delete("/users/profile-picture")
+
     assert response.status_code == 200
 
 

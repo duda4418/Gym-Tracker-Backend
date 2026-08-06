@@ -154,10 +154,6 @@ def configure_logging(settings: Settings) -> None:
         if _logging_configured:
             return
 
-        logs_dir = Path(settings.LOGS_DIR)
-        logs_dir.mkdir(parents=True, exist_ok=True)
-        log_file = logs_dir / settings.LOG_FILE_NAME
-
         formatter = JsonFormatter()
         trace_filter = TraceContextFilter()
 
@@ -165,20 +161,23 @@ def configure_logging(settings: Settings) -> None:
         stream_handler.setFormatter(formatter)
         stream_handler.addFilter(trace_filter)
 
-        file_handler = RotatingFileHandler(
-            log_file,
-            maxBytes=5 * 1024 * 1024,
-            backupCount=3,
-            encoding="utf-8",
-        )
-        file_handler.setFormatter(formatter)
-        file_handler.addFilter(trace_filter)
-
         logger = get_app_logger()
         logger.setLevel(getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO))
         logger.handlers.clear()
         logger.addHandler(stream_handler)
-        logger.addHandler(file_handler)
+        if settings.LOG_TO_FILE:
+            logs_dir = Path(settings.LOGS_DIR)
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            log_file = logs_dir / settings.LOG_FILE_NAME
+            file_handler = RotatingFileHandler(
+                log_file,
+                maxBytes=5 * 1024 * 1024,
+                backupCount=3,
+                encoding="utf-8",
+            )
+            file_handler.setFormatter(formatter)
+            file_handler.addFilter(trace_filter)
+            logger.addHandler(file_handler)
         logger.propagate = False
 
         _logging_configured = True

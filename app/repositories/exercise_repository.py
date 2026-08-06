@@ -29,6 +29,7 @@ class ExerciseRepository:
             pic=data.pic,
             tips=data.tips,
             equipment=data.equipment,
+            exercise_type=data.exercise_type,
             favourite=data.favourite,
             muscle_id=data.muscle_id,
         )
@@ -38,6 +39,19 @@ class ExerciseRepository:
 
     def add_secondary_muscle(self, exercise_id, muscle_id):
         self.session.add(ExerciseSecondaryMuscle(exercise_id=exercise_id, muscle_id=muscle_id))
+
+    def update(self, exercise: Exercise, changes: dict) -> Exercise:
+        for field, value in changes.items():
+            setattr(exercise, field, value)
+        self.session.add(exercise)
+        self.session.flush()
+        return exercise
+
+    def replace_secondary_muscles(self, exercise_id, muscle_ids) -> None:
+        self.session.query(ExerciseSecondaryMuscle).filter_by(exercise_id=exercise_id).delete()
+        for muscle_id in dict.fromkeys(muscle_ids):
+            self.add_secondary_muscle(exercise_id, muscle_id)
+        self.session.flush()
 
     def list_secondary_links(self, exercise_id):
         return (

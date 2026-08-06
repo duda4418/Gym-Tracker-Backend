@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import Column, DateTime, LargeBinary, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.database import Base
@@ -12,6 +12,10 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     name = Column(String, nullable=True)
     qr_code = Column(String, nullable=True)
+    qr_code_data = Column(LargeBinary, nullable=True)
+    qr_code_content_type = Column(String, nullable=True)
+    profile_pic_data = Column(LargeBinary, nullable=True)
+    profile_pic_content_type = Column(String, nullable=True)
     password_hash = Column(String, nullable=False)
     refresh_token_hash = Column(String, nullable=True)
     refresh_token_expires_at = Column(DateTime(timezone=True), nullable=True)

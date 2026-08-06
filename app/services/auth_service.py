@@ -17,6 +17,7 @@ from app.utils.auth import (
     hash_token,
     verify_password,
 )
+from app.services.profile_service import PROFILE_PICTURE_URL
 
 
 class AuthService:
@@ -54,11 +55,21 @@ class AuthService:
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        return UserResponse(id=db_user.id, email=db_user.email, name=db_user.name)
+        return UserResponse(
+            id=db_user.id,
+            email=db_user.email,
+            name=db_user.name,
+            profile_pic=PROFILE_PICTURE_URL if db_user.profile_pic_data else None,
+        )
 
     async def authenticate_access_token(self, token: str) -> AuthenticatedUser:
         db_user = self._get_user_from_token(token)
-        return AuthenticatedUser(id=db_user.id, email=db_user.email, name=db_user.name)
+        return AuthenticatedUser(
+            id=db_user.id,
+            email=db_user.email,
+            name=db_user.name,
+            profile_pic=PROFILE_PICTURE_URL if db_user.profile_pic_data else None,
+        )
 
     async def logout(self, user_id, refresh_token: str | None = None) -> dict:
         db_user = self.repo.get_by_id(user_id)
@@ -92,7 +103,11 @@ class AuthService:
     def _auth_response(user) -> AuthResponse:
         return AuthResponse(
             access_token=create_access_token(str(user.id)),
-            user=AuthUserResponse(id=user.id, email=user.email),
+            user=AuthUserResponse(
+                id=user.id,
+                email=user.email,
+                profile_pic=PROFILE_PICTURE_URL if user.profile_pic_data else None,
+            ),
         )
 
     def _get_user_from_token(self, token: str, expected_type: str | None = None):

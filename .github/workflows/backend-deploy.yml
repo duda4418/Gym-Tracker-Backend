@@ -1,4 +1,4 @@
-name: Deploy backend to AWS
+name: Deploy backend to Lambda
 
 on:
   push:
@@ -17,16 +17,7 @@ concurrency:
 env:
   AWS_REGION: "${{ vars.AWS_REGION || 'eu-central-1' }}"
   AWS_ROLE_ARN: "${{ vars.AWS_ROLE_ARN || 'arn:aws:iam::606008290381:role/gym-tracker-backend-gha-role' }}"
-  ECR_REPOSITORY_URI: "${{ vars.ECR_REPOSITORY_URI || '606008290381.dkr.ecr.eu-central-1.amazonaws.com/gym-tracker-backend' }}"
-  EC2_INSTANCE_ID: "${{ vars.EC2_INSTANCE_ID || 'i-0f68f03ec9c6a1330' }}"
-  CONTAINER_NAME: "${{ vars.CONTAINER_NAME || 'gym-tracker-backend' }}"
-  REMOTE_APP_DIR: "${{ vars.REMOTE_APP_DIR || '/opt/gym-tracker/backend' }}"
-  HOST_PORT: "${{ vars.HOST_PORT || '8000' }}"
-  CONTAINER_PORT: "${{ vars.CONTAINER_PORT || '8000' }}"
-  APP_NETWORK: "${{ vars.APP_NETWORK || 'gym-tracker-net' }}"
-  OBSERVABILITY_DIR: "${{ vars.OBSERVABILITY_DIR || '/opt/gym-tracker/observability' }}"
-  BACKEND_ENV_SSM_PARAMETER: "${{ vars.BACKEND_ENV_SSM_PARAMETER || '' }}"
-  BACKEND_ENV_SECRET_ID: "${{ vars.BACKEND_ENV_SECRET_ID || '' }}"
+  LAMBDA_FUNCTION_NAME: "${{ vars.LAMBDA_FUNCTION_NAME || 'gym-tracker-prod-backend' }}"
 
 jobs:
   deploy:
@@ -36,303 +27,111 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            requirements-lambda.txt
+            requirements.txt
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push backend image
+      - name: Validate deployment settings
         env:
-          IMAGE_TAG: ${{ github.sha }}
+          NEON_DIRECT_DATABASE_URL: ${{ secrets.NEON_DIRECT_DATABASE_URL }}
+          NEON_POOLED_DATABASE_URL: ${{ secrets.NEON_POOLED_DATABASE_URL }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         run: |
           set -euo pipefail
-          docker build --pull \
-            -t "$ECR_REPOSITORY_URI:$IMAGE_TAG" \
-            -t "$ECR_REPOSITORY_URI:latest" \
-            .
-          docker push "$ECR_REPOSITORY_URI:$IMAGE_TAG"
-          docker push "$ECR_REPOSITORY_URI:latest"
+          test -n "$NEON_DIRECT_DATABASE_URL" || { echo "Missing NEON_DIRECT_DATABASE_URL secret" >&2; exit 1; }
+          test -n "$NEON_POOLED_DATABASE_URL" || { echo "Missing NEON_POOLED_DATABASE_URL secret" >&2; exit 1; }
+          test -n "$JWT_SECRET_KEY" || { echo "Missing JWT_SECRET_KEY secret" >&2; exit 1; }
 
-      - name: Deploy on EC2 through AWS Systems Manager
-        id: deploy
+      - name: Apply schema and seed catalog
         env:
-          IMAGE_URI: ${{ env.ECR_REPOSITORY_URI }}:${{ github.sha }}
-        shell: bash
+          DATABASE_URL: ${{ secrets.NEON_DIRECT_DATABASE_URL }}
+          MIGRATION_DATABASE_URL: ${{ secrets.NEON_DIRECT_DATABASE_URL }}
+          LOG_TO_FILE: "false"
+          METRICS_ENABLED: "false"
+          OTEL_ENABLED: "false"
+          PYROSCOPE_ENABLED: "false"
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json
-          import os
-          import shlex
-          import subprocess
-          import textwrap
+          python -m pip install --disable-pip-version-check \
+            alembic \
+            sqlalchemy \
+            "psycopg[binary]" \
+            pydantic-settings
+          python -m alembic upgrade head
+          python -m app.scripts.seed_upload_data
 
-          image_uri = os.environ["IMAGE_URI"]
-          region = os.environ["AWS_REGION"]
-          instance_id = os.environ["EC2_INSTANCE_ID"]
-          container_name = os.environ["CONTAINER_NAME"]
-          app_dir = os.environ["REMOTE_APP_DIR"]
-          host_port = os.environ["HOST_PORT"]
-          container_port = os.environ["CONTAINER_PORT"]
-          app_network = os.environ["APP_NETWORK"]
-          observability_dir = os.environ["OBSERVABILITY_DIR"]
-          env_parameter = os.environ.get("BACKEND_ENV_SSM_PARAMETER", "")
-          env_secret = os.environ.get("BACKEND_ENV_SECRET_ID", "")
-          env_file = f"{app_dir}/backend.env"
-          registry = image_uri.split("/")[0]
+      - name: Build Lambda ZIP
+        run: bash scripts/build_lambda_package.sh
 
-          q = shlex.quote
-          candidate_name = f"{container_name}-candidate"
-          script = textwrap.dedent(
-              f"""\
-              set -euo pipefail
-
-              APP_DIR={q(app_dir)}
-              ENV_FILE={q(env_file)}
-              IMAGE_URI={q(image_uri)}
-              ECR_REGISTRY={q(registry)}
-              AWS_REGION={q(region)}
-              CONTAINER_NAME={q(container_name)}
-              CANDIDATE_NAME={q(candidate_name)}
-              HOST_PORT={q(host_port)}
-              CONTAINER_PORT={q(container_port)}
-              APP_NETWORK={q(app_network)}
-              OBSERVABILITY_DIR={q(observability_dir)}
-              BACKEND_ENV_SSM_PARAMETER={q(env_parameter)}
-              BACKEND_ENV_SECRET_ID={q(env_secret)}
-
-              ROLLOUT_STARTED=false
-
-              health_check() {{
-                local target_container="$1"
-
-                for attempt in $(seq 1 15); do
-                  if docker exec "$target_container" python -c 'import json,sys,urllib.request; payload=json.loads(urllib.request.urlopen("http://127.0.0.1:'"$CONTAINER_PORT"'/", timeout=2).read().decode()); sys.exit(0 if payload.get("status") == "ok" else 1)'; then
-                    return 0
-                  fi
-                  sleep 2
-                done
-
-                return 1
-              }}
-
-              fetch_env_file() {{
-                local tmp_env
-
-                mkdir -p "$APP_DIR"
-                mkdir -p "$APP_DIR/app/logs"
-                mkdir -p "$APP_DIR/app/uploads"
-                tmp_env="$(mktemp "$APP_DIR/backend.env.tmp.XXXXXX")"
-
-                if [ -n "$BACKEND_ENV_SSM_PARAMETER" ]; then
-                  aws ssm get-parameter \
-                    --name "$BACKEND_ENV_SSM_PARAMETER" \
-                    --with-decryption \
-                    --query 'Parameter.Value' \
-                    --output text > "$tmp_env"
-                elif [ -n "$BACKEND_ENV_SECRET_ID" ]; then
-                  aws secretsmanager get-secret-value \
-                    --secret-id "$BACKEND_ENV_SECRET_ID" \
-                    --query 'SecretString' \
-                    --output text > "$tmp_env"
-                else
-                  echo "Set BACKEND_ENV_SSM_PARAMETER or BACKEND_ENV_SECRET_ID in GitHub Actions repository variables." >&2
-                  rm -f "$tmp_env"
-                  exit 1
-                fi
-
-                if [ ! -s "$tmp_env" ]; then
-                  echo "Fetched backend env file is empty." >&2
-                  rm -f "$tmp_env"
-                  exit 1
-                fi
-
-                chmod 600 "$tmp_env"
-                mv "$tmp_env" "$ENV_FILE"
-              }}
-
-              ensure_runtime_dependencies() {{
-                local compose_cmd
-
-                docker network create "$APP_NETWORK" >/dev/null 2>&1 || true
-
-                if docker compose version >/dev/null 2>&1; then
-                  compose_cmd="docker compose"
-                elif command -v docker-compose >/dev/null 2>&1; then
-                  compose_cmd="docker-compose"
-                else
-                  compose_cmd=""
-                fi
-
-                if [ -n "$compose_cmd" ] && [ -f "$OBSERVABILITY_DIR/docker-compose.yml" ]; then
-                  (
-                    cd "$OBSERVABILITY_DIR"
-                    $compose_cmd up -d --remove-orphans
-                  )
-                fi
-              }}
-
-              rollback() {{
-                local exit_code="$1"
-
-                docker rm -f "$CANDIDATE_NAME" >/dev/null 2>&1 || true
-
-                if [ "$ROLLOUT_STARTED" != true ]; then
-                  exit "$exit_code"
-                fi
-
-                if [ -z "$PREVIOUS_IMAGE_ID" ]; then
-                  echo "Deploy failed and no previous image is available for rollback." >&2
-                  exit "$exit_code"
-                fi
-
-                ROLLBACK_IMAGE_LABEL="$PREVIOUS_IMAGE_ID"
-                if [ -n "$PREVIOUS_IMAGE_NAME" ]; then
-                  ROLLBACK_IMAGE_LABEL="$PREVIOUS_IMAGE_NAME"
-                fi
-                echo "Deploy failed. Rolling back to $ROLLBACK_IMAGE_LABEL" >&2
-
-                docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
-                docker run -d \
-                  --name "$CONTAINER_NAME" \
-                  --restart unless-stopped \
-                  --env-file "$ENV_FILE" \
-                  --network "$APP_NETWORK" \
-                  --network-alias "$CONTAINER_NAME" \
-                  -p "$HOST_PORT:$CONTAINER_PORT" \
-                  -v "$APP_DIR/app/logs:/app/app/logs" \
-                  -v "$APP_DIR/app/uploads:/app/app/uploads" \
-                  "$PREVIOUS_IMAGE_ID"
-
-                if ! health_check "$CONTAINER_NAME"; then
-                  echo "Rollback container failed health check." >&2
-                  docker logs "$CONTAINER_NAME" --tail 100 >&2 || true
-                fi
-
-                exit "$exit_code"
-              }}
-
-              trap 'rollback "$?"' EXIT
-
-              if ! command -v docker >/dev/null 2>&1; then
-                echo "docker is required on the EC2 instance" >&2
-                exit 1
-              fi
-
-              if ! command -v aws >/dev/null 2>&1; then
-                echo "aws cli is required on the EC2 instance" >&2
-                exit 1
-              fi
-
-              fetch_env_file
-              ensure_runtime_dependencies
-
-              PREVIOUS_IMAGE_ID="$(docker inspect "$CONTAINER_NAME" --format '{{{{.Image}}}}' 2>/dev/null || true)"
-              PREVIOUS_IMAGE_NAME="$(docker inspect "$CONTAINER_NAME" --format '{{{{.Config.Image}}}}' 2>/dev/null || true)"
-
-              aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
-              docker pull "$IMAGE_URI"
-
-              docker run --rm --env-file "$ENV_FILE" --network "$APP_NETWORK" "$IMAGE_URI" alembic upgrade head
-
-              docker rm -f "$CANDIDATE_NAME" >/dev/null 2>&1 || true
-
-              docker run -d \
-                --name "$CANDIDATE_NAME" \
-                --env-file "$ENV_FILE" \
-                --network "$APP_NETWORK" \
-                -v "$APP_DIR/app/logs:/app/app/logs" \
-                -v "$APP_DIR/app/uploads:/app/app/uploads" \
-                "$IMAGE_URI"
-
-              if ! health_check "$CANDIDATE_NAME"; then
-                echo "Candidate container failed health check." >&2
-                docker logs "$CANDIDATE_NAME" --tail 100 >&2 || true
-                exit 1
-              fi
-
-              ROLLOUT_STARTED=true
-
-              docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
-              docker run -d \
-                --name "$CONTAINER_NAME" \
-                --restart unless-stopped \
-                --env-file "$ENV_FILE" \
-                --network "$APP_NETWORK" \
-                --network-alias "$CONTAINER_NAME" \
-                -p "$HOST_PORT:$CONTAINER_PORT" \
-                -v "$APP_DIR/app/logs:/app/app/logs" \
-                -v "$APP_DIR/app/uploads:/app/app/uploads" \
-                "$IMAGE_URI"
-
-              if ! health_check "$CONTAINER_NAME"; then
-                echo "New production container failed health check." >&2
-                docker logs "$CONTAINER_NAME" --tail 100 >&2 || true
-                exit 1
-              fi
-
-              docker rm -f "$CANDIDATE_NAME" >/dev/null 2>&1 || true
-              trap - EXIT
-
-              docker ps --filter "name=$CONTAINER_NAME" --format "table {{{{.Names}}}}\t{{{{.Status}}}}\t{{{{.Image}}}}"
-              """
-          )
-          commands = script.splitlines()
-
-          short_sha = image_uri.rsplit(":", 1)[-1][:12]
-          comment = f"Deploy backend {short_sha}"
-
-          send_command = [
-              "aws",
-              "ssm",
-              "send-command",
-              "--instance-ids",
-              instance_id,
-              "--document-name",
-              "AWS-RunShellScript",
-              "--comment",
-              comment,
-              "--parameters",
-              json.dumps({"commands": commands}),
-              "--query",
-              "Command.CommandId",
-              "--output",
-              "text",
-          ]
-
-          result = subprocess.run(send_command, capture_output=True, text=True)
-          if result.returncode != 0:
-              print(result.stdout)
-              print(result.stderr)
-              raise SystemExit(result.returncode)
-
-          command_id = result.stdout.strip()
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as github_output:
-              github_output.write(f"command_id={command_id}\n")
-          print(f"Started SSM command: {command_id}")
-          PY
-
-      - name: Wait for deployment command to finish
-        env:
-          COMMAND_ID: ${{ steps.deploy.outputs.command_id }}
-        shell: bash
+      - name: Deploy Lambda code
         run: |
           set -euo pipefail
-          if ! aws ssm wait command-executed --command-id "$COMMAND_ID" --instance-id "$EC2_INSTANCE_ID"; then
-            aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$EC2_INSTANCE_ID" --output json
-            exit 1
-          fi
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --zip-file fileb://build/lambda/lambda.zip \
+            --no-cli-pager
+          aws lambda wait function-updated-v2 --function-name "$LAMBDA_FUNCTION_NAME"
 
-          aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$EC2_INSTANCE_ID" --output json
+      - name: Configure Lambda runtime
+        env:
+          NEON_POOLED_DATABASE_URL: ${{ secrets.NEON_POOLED_DATABASE_URL }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          CORS_ORIGINS: "${{ vars.CORS_ORIGINS || 'http://localhost:3000' }}"
+          CORS_ORIGIN_REGEX: "${{ vars.CORS_ORIGIN_REGEX || 'https://.*\\.vercel\\.app' }}"
+          ASSET_BASE_URL: "${{ vars.ASSET_BASE_URL || '' }}"
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg database_url "$NEON_POOLED_DATABASE_URL" \
+            --arg jwt_secret_key "$JWT_SECRET_KEY" \
+            --arg cors_origins "$CORS_ORIGINS" \
+            --arg cors_origin_regex "$CORS_ORIGIN_REGEX" \
+            --arg asset_base_url "$ASSET_BASE_URL" \
+            '{Variables: {
+              DATABASE_URL: $database_url,
+              POSTGRES_CONNECT_TIMEOUT_SECONDS: "5",
+              POSTGRES_POOL_TIMEOUT_SECONDS: "5",
+              DATABASE_POOL_SIZE: "1",
+              DATABASE_MAX_OVERFLOW: "0",
+              DATABASE_POOL_RECYCLE_SECONDS: "300",
+              JWT_SECRET_KEY: $jwt_secret_key,
+              JWT_ALGORITHM: "HS256",
+              JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "20160",
+              JWT_REFRESH_TOKEN_EXPIRE_DAYS: "7",
+              CORS_ORIGINS: $cors_origins,
+              CORS_ORIGIN_REGEX: $cors_origin_regex,
+              ASSET_BASE_URL: $asset_base_url,
+              SERVE_LOCAL_UPLOADS: "false",
+              LOG_TO_FILE: "false",
+              METRICS_ENABLED: "false",
+              OTEL_ENABLED: "false",
+              PYROSCOPE_ENABLED: "false"
+            }}' > /tmp/lambda-environment.json
 
-          STATUS=$(aws ssm get-command-invocation \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$EC2_INSTANCE_ID" \
-            --query 'Status' \
+          aws lambda update-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --environment file:///tmp/lambda-environment.json \
+            --no-cli-pager
+          aws lambda wait function-updated-v2 --function-name "$LAMBDA_FUNCTION_NAME"
+
+      - name: Verify Function URL
+        run: |
+          set -euo pipefail
+          function_url=$(aws lambda get-function-url-config \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --query FunctionUrl \
             --output text)
-
-          test "$STATUS" = "Success"
+          curl --fail --show-error --silent \
+            --retry 5 --retry-delay 3 --retry-all-errors \
+            "$function_url"
