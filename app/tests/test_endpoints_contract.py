@@ -48,6 +48,7 @@ def test_get_exercises(client):
                     "pic": "/uploads/exercises/bench.png",
                     "tips": "keep elbows tucked",
                     "equipment": "barbell",
+                    "rest_time": 90,
                     "favourite": False,
                     "primary_muscle": "Chest",
                     "secondary_muscles": ["Triceps"],
@@ -72,6 +73,7 @@ def test_get_exercises_by_muscle(client):
                     "pic": "/uploads/exercises/pushup.png",
                     "tips": "core tight",
                     "equipment": "bodyweight",
+                    "rest_time": 90,
                     "favourite": True,
                     "primary_muscle": "Chest",
                     "secondary_muscles": ["Triceps"],
@@ -88,7 +90,8 @@ def test_create_exercise(client):
     muscle_id = uuid4()
 
     class Service:
-        async def create_exercise(self, _):
+        async def create_exercise(self, data):
+            assert data.rest_time == 90
             return {
                 "id": str(uuid4()),
                 "name": "Incline Bench",
@@ -96,6 +99,7 @@ def test_create_exercise(client):
                 "pic": "incline.png",
                 "tips": "slow eccentric",
                 "equipment": "barbell",
+                "rest_time": 90,
                 "favourite": False,
                 "primary_muscle": "Chest",
                 "secondary_muscles": ["Triceps"],
@@ -109,6 +113,7 @@ def test_create_exercise(client):
             "pic": "incline.png",
             "tips": "slow eccentric",
             "equipment": "barbell",
+            "rest_time": 90,
             "favourite": False,
             "muscle_id": str(muscle_id),
             "secondary_muscles": [str(uuid4())],
@@ -126,6 +131,7 @@ def test_update_exercise(client):
             assert requested_id == exercise_id
             assert data.name == "Incline Dumbbell Press"
             assert data.exercise_type == "weighted"
+            assert data.rest_time == 120
             return {
                 "id": str(exercise_id),
                 "name": data.name,
@@ -134,6 +140,7 @@ def test_update_exercise(client):
                 "tips": None,
                 "equipment": "dumbbells",
                 "exercise_type": data.exercise_type,
+                "rest_time": data.rest_time,
                 "favourite": False,
                 "primary_muscle": "Chest",
                 "secondary_muscles": ["Triceps"],
@@ -146,12 +153,14 @@ def test_update_exercise(client):
             "name": "Incline Dumbbell Press",
             "equipment": "dumbbells",
             "exercise_type": "weighted",
+            "rest_time": 120,
         },
     )
 
     assert response.status_code == 200
     assert response.json()["name"] == "Incline Dumbbell Press"
     assert response.json()["exercise_type"] == "weighted"
+    assert response.json()["rest_time"] == 120
 
 
 def test_create_exercises_bulk(client):
@@ -167,6 +176,7 @@ def test_create_exercises_bulk(client):
                     "pic": "row.png",
                     "tips": "brace",
                     "equipment": "barbell",
+                    "rest_time": 90,
                     "favourite": False,
                     "primary_muscle": "Back",
                     "secondary_muscles": ["Biceps"],
@@ -183,6 +193,7 @@ def test_create_exercises_bulk(client):
                     "pic": "row.png",
                     "tips": "brace",
                     "equipment": "barbell",
+                    "rest_time": 90,
                     "favourite": False,
                     "muscle_id": str(muscle_id),
                     "secondary_muscles": [str(uuid4())],

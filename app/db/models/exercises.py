@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, String
+from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.database import Base
@@ -20,6 +20,7 @@ class Exercise(Base):
     tips = Column(String, nullable=True)
     equipment = Column(String, nullable=True)
     exercise_type = Column(String, nullable=False, default=ExerciseType.WEIGHTED.value)
+    rest_time = Column(Integer, nullable=False, default=90)
     favourite = Column(Boolean, default=False)
 
     muscle_id = Column(UUID(as_uuid=True), ForeignKey("muscles.id"), nullable=False)

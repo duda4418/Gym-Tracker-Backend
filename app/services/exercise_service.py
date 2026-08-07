@@ -36,6 +36,7 @@ class ExerciseService:
             tips=exercise.tips,
             equipment=exercise.equipment,
             exercise_type=exercise.exercise_type,
+            rest_time=exercise.rest_time,
             favourite=exercise.favourite if favourite is None else favourite,
             primary_muscle=primary_muscle_name,
             secondary_muscles=secondary_names,
@@ -91,7 +92,7 @@ class ExerciseService:
             raise HTTPException(status_code=404, detail="Exercise not found")
 
         changes = data.model_dump(exclude_unset=True, exclude={"secondary_muscles"})
-        for required_field in ("name", "exercise_type", "favourite", "muscle_id"):
+        for required_field in ("name", "exercise_type", "rest_time", "favourite", "muscle_id"):
             if required_field in changes and changes[required_field] is None:
                 raise HTTPException(status_code=400, detail=f"{required_field} cannot be null")
 

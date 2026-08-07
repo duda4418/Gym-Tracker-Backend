@@ -30,6 +30,7 @@ class ExerciseRepository:
             tips=data.tips,
             equipment=data.equipment,
             exercise_type=data.exercise_type,
+            rest_time=data.rest_time,
             favourite=data.favourite,
             muscle_id=data.muscle_id,
         )

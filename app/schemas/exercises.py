@@ -10,6 +10,7 @@ class ExerciseCreate(BaseModel):
     tips: Optional[str]
     equipment: Optional[str]
     exercise_type: ExerciseType = ExerciseType.WEIGHTED
+    rest_time: int = Field(default=90, ge=0)
     favourite: bool = False
     muscle_id: UUID  # ✅ Primary muscle
     secondary_muscles: List[UUID] = Field(default_factory=list)
@@ -21,6 +22,7 @@ class ExerciseUpdate(BaseModel):
     tips: str | None = None
     equipment: str | None = None
     exercise_type: ExerciseType | None = None
+    rest_time: int | None = Field(default=None, ge=0)
     favourite: bool | None = None
     muscle_id: UUID | None = None
     secondary_muscles: list[UUID] | None = None
@@ -33,6 +35,7 @@ class ExerciseResponse(BaseModel):
     tips: Optional[str]
     equipment: Optional[str]
     exercise_type: ExerciseType = ExerciseType.WEIGHTED
+    rest_time: int
     favourite: bool
     primary_muscle: str  # ✅ Returns primary muscle name
     secondary_muscles: List[str]  # ✅ Returns secondary muscle names

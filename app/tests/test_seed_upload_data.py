@@ -126,3 +126,11 @@ def test_find_existing_exercise_falls_back_to_pic_match():
     assert matched is existing
 
 
+def test_catalog_uses_machine_instead_of_lever_names():
+    exercises, skipped = load_exercise_catalog()
+
+    assert skipped == []
+    assert all("Lever" not in exercise.name for exercise in exercises)
+    assert any("Machine" in exercise.name for exercise in exercises)
+
+

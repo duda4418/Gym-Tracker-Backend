@@ -989,7 +989,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Alternate Biceps Curl",
+    "name": "Machine Alternate Biceps Curl",
     "pic": "10321101-Lever-Alternate-Biceps-Curl_Upper-Arms_small.jpg",
     "tips": "",
     "equipment": "Machine",
@@ -998,7 +998,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Back Extension",
+    "name": "Machine Back Extension",
     "pic": "05731201-Lever-Back-Extension_Waist.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1007,7 +1007,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Bent Over Row with V Bar (plate Loaded)",
+    "name": "Machine Bent Over Row with V Bar (plate Loaded)",
     "pic": "32001201-Lever-Bent-over-Row-with-V-bar-(plate-loaded)_Back.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1018,7 +1018,7 @@
     ]
   },
   {
-    "name": "Lever Chest Press",
+    "name": "Machine Chest Press",
     "pic": "05771201-Lever-Chest-Press_Chest.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1030,7 +1030,7 @@
     ]
   },
   {
-    "name": "Lever Decline Chest Press",
+    "name": "Machine Decline Chest Press",
     "pic": "13001201-Lever-Decline-Chest-Press_Chest-FIX_.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1042,7 +1042,7 @@
     ]
   },
   {
-    "name": "Lever Front Pulldown",
+    "name": "Machine Front Pulldown",
     "pic": "05791201-Lever-Front-Pulldown_Back.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1053,7 +1053,7 @@
     ]
   },
   {
-    "name": "Lever Full Squat",
+    "name": "Machine Full Squat",
     "pic": "10391101-Lever-Full-Squat_Thighs_small.jpg",
     "tips": "",
     "equipment": "Machine",
@@ -1062,7 +1062,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever High Row (plate Loaded)",
+    "name": "Machine High Row (plate Loaded)",
     "pic": "05811101-Lever-High-Row-(plate-loaded)_Back_small.jpg",
     "tips": "",
     "equipment": "Machine",
@@ -1073,7 +1073,7 @@
     ]
   },
   {
-    "name": "Lever Hip Thrust",
+    "name": "Machine Hip Thrust",
     "pic": "21461201-Lever-Hip-Thrust_Hips.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1084,7 +1084,7 @@
     ]
   },
   {
-    "name": "Lever Incline Chest Press",
+    "name": "Machine Incline Chest Press",
     "pic": "14791201-Lever-Incline-Chest-Press_Chest.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1096,7 +1096,7 @@
     ]
   },
   {
-    "name": "Lever Lateral Raise",
+    "name": "Machine Lateral Raise",
     "pic": "05841201-Lever-Lateral-Raise_shoulder.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1105,7 +1105,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Leg Extension",
+    "name": "Machine Leg Extension",
     "pic": "05851201-Lever-Leg-Extension_Thighs.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1114,7 +1114,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Low Row (plate Loaded)",
+    "name": "Machine Low Row (plate Loaded)",
     "pic": "42141201-Lever-Low-Row-(plate-loaded)_Back_.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1125,7 +1125,7 @@
     ]
   },
   {
-    "name": "Lever Lying Leg Curl",
+    "name": "Machine Lying Leg Curl",
     "pic": "05861201-Lever-Lying-Leg-Curl_Thighs.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1134,7 +1134,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Narrow Grip Seated Row (plate Loaded)",
+    "name": "Machine Narrow Grip Seated Row (plate Loaded)",
     "pic": "05881101-Lever-Narrow-Grip-Seated-Row-(plate-loaded)_Back_small.jpg",
     "tips": "",
     "equipment": "Machine",
@@ -1145,7 +1145,7 @@
     ]
   },
   {
-    "name": "Lever Pec Deck Fly",
+    "name": "Machine Pec Deck Fly",
     "pic": "10301201-Lever-Pec-Deck-Fly_Chest.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1154,7 +1154,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Preacher Curl",
+    "name": "Machine Preacher Curl",
     "pic": "05921201-Lever-Preacher-Curl_Upper-Arms.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1163,7 +1163,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Pullover (plate Loaded)",
+    "name": "Machine Pullover (plate Loaded)",
     "pic": "22851201-Lever-Pullover-(plate-loaded)_Back_.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1174,7 +1174,7 @@
     ]
   },
   {
-    "name": "Lever Reverse Hyperextension (plate Loaded)",
+    "name": "Machine Reverse Hyperextension (plate Loaded)",
     "pic": "05931201-Lever-Reverse-Hyperextension-(plate-loaded)_Hips.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1186,7 +1186,7 @@
     ]
   },
   {
-    "name": "Lever Rotary Calf",
+    "name": "Machine Rotary Calf",
     "pic": "23151201-Lever-Rotary-Calf_Calves.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1195,7 +1195,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Seated Crunch (chest Pad)",
+    "name": "Machine Seated Crunch (chest Pad)",
     "pic": "05951201-Lever-Seated-Crunch-(chest-pad).mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1204,7 +1204,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Seated Dip",
+    "name": "Machine Seated Dip",
     "pic": "14511201-Lever-Seated-Dip_Upper-Arms.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1215,7 +1215,7 @@
     ]
   },
   {
-    "name": "Lever Seated Fly",
+    "name": "Machine Seated Fly",
     "pic": "05961201-Lever-Seated-Fly_Chest.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1224,7 +1224,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Seated Leg Curl",
+    "name": "Machine Seated Leg Curl",
     "pic": "05991201-Lever-Seated-Leg-Curl_Thighs.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1233,7 +1233,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Seated Leg Press",
+    "name": "Machine Seated Leg Press",
     "pic": "22671201-Lever-Seated-Leg-Press_Thighs.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1242,7 +1242,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Seated Reverse Fly",
+    "name": "Machine Seated Reverse Fly",
     "pic": "06021201-Lever-Seated-Reverse-Fly_Shoulders.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1251,7 +1251,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Seated Row (version 2)",
+    "name": "Machine Seated Row (version 2)",
     "pic": "22651201-Lever-Seated-Row-(version-2)_Back.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1262,7 +1262,7 @@
     ]
   },
   {
-    "name": "Lever Seated Shoulder Press",
+    "name": "Machine Seated Shoulder Press",
     "pic": "14541201-Lever-Seated-Shoulder-Press_Shoulders.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1273,7 +1273,7 @@
     ]
   },
   {
-    "name": "Lever Standing Calf Raise",
+    "name": "Machine Standing Calf Raise",
     "pic": "06051201-Lever-Standing-Calf-Raise_Calves.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1282,7 +1282,7 @@
     "secondary_muscles": []
   },
   {
-    "name": "Lever Standing Rear Kick",
+    "name": "Machine Standing Rear Kick",
     "pic": "10371201-Lever-Standing-Rear-Kick_Hips.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1293,7 +1293,7 @@
     ]
   },
   {
-    "name": "Lever T Bar Row (plate Loaded)",
+    "name": "Machine T Bar Row (plate Loaded)",
     "pic": "06061201-Lever-T-bar-Row-(plate-loaded)_Back.mp4",
     "tips": "",
     "equipment": "Machine",
@@ -1304,7 +1304,7 @@
     ]
   },
   {
-    "name": "Lever Triceps Extension",
+    "name": "Machine Triceps Extension",
     "pic": "10331201-Lever-Triceps-Extension_Upper-Arms.mp4",
     "tips": "",
     "equipment": "Machine",

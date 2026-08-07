@@ -61,6 +61,7 @@ def test_update_exercise_replaces_supplied_secondary_muscles():
         tips=None,
         equipment="barbell",
         exercise_type="weighted",
+        rest_time=90,
         favourite=False,
     )
     muscles = {
@@ -81,6 +82,7 @@ def test_update_exercise_replaces_supplied_secondary_muscles():
             ExerciseUpdate(
                 name="Incline Press",
                 exercise_type="negative",
+                rest_time=120,
                 secondary_muscles=[secondary_muscle_id, secondary_muscle_id],
             ),
         )
@@ -88,6 +90,7 @@ def test_update_exercise_replaces_supplied_secondary_muscles():
 
     assert response.name == "Incline Press"
     assert response.exercise_type == "negative"
+    assert response.rest_time == 120
     assert response.secondary_muscles == ["Triceps"]
     assert exercise_repo.secondary_muscle_ids == [secondary_muscle_id]
     assert exercise_repo.session.committed is True
