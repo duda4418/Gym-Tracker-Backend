@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from collections import defaultdict
 import json
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 from uuid import uuid4
 
 if __package__ in {None, ""}:
@@ -33,6 +35,29 @@ LEGACY_MUSCLE_ID_TO_NAME = {
     "e1595911-ce98-478f-a556-5d8961e2c7db": "Shoulders",
 }
 
+EXTERNAL_MUSCLE_GROUP_TO_NAME = {
+    "abdominals": "Abs",
+    "abductors": "Glutes",
+    "adductors": "Glutes",
+    "biceps": "Biceps",
+    "calves": "Calves",
+    "cardio": "Cardio",
+    "chest": "Chest",
+    "forearms": "Forearms",
+    "full_body": "Other",
+    "glutes": "Glutes",
+    "hamstrings": "Hamstrings",
+    "lats": "Lats",
+    "lower_back": "Lower Back",
+    "neck": "Neck",
+    "other": "Other",
+    "quadriceps": "Quadriceps",
+    "shoulders": "Shoulders",
+    "traps": "Traps",
+    "triceps": "Triceps",
+    "upper_back": "Back",
+}
+
 
 @dataclass(frozen=True)
 class MuscleSeed:
@@ -49,6 +74,7 @@ class ExerciseSeed:
     favourite: bool
     primary_muscle: str
     secondary_muscles: list[str]
+    catalog_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -88,36 +114,57 @@ def _resolve_muscle_reference(reference: str | None, known_muscles: set[str]) ->
     return known_by_casefold.get(normalized_reference.casefold())
 
 
+def _resolve_external_muscle_group(reference: str | None) -> str | None:
+    if not reference:
+        return None
+    return EXTERNAL_MUSCLE_GROUP_TO_NAME.get(reference.strip().casefold())
+
+
 def _normalize_pic_key(pic: str | None) -> str | None:
     if not pic:
         return None
 
-    path = Path(pic)
+    path = Path(urlparse(pic).path)
     normalized_stem = path.stem.rstrip("_-")
     return f"{normalized_stem}{path.suffix.lower()}"
+
+
+def _asset_code(pic: str | None) -> str | None:
+    if not pic:
+        return None
+    match = re.search(r"\b(\d{8})", Path(urlparse(pic).path).name)
+    return match.group(1) if match else None
+
+
+def _catalog_display_name(name: str, is_external_catalog: bool) -> str:
+    return name.replace("Lever", "Machine") if is_external_catalog else name
 
 
 def load_exercise_catalog(
     exercises_json: Path = EXERCISES_JSON,
     muscles_dir: Path = MUSCLES_DIR,
 ) -> tuple[list[ExerciseSeed], list[str]]:
-    raw_items = json.loads(exercises_json.read_text(encoding="utf-8"))
+    raw_items = json.loads(exercises_json.read_text(encoding="utf-8-sig"))
     known_muscles = {muscle.name for muscle in discover_muscles(muscles_dir)}
+    known_muscles.update(EXTERNAL_MUSCLE_GROUP_TO_NAME.values())
     exercises: list[ExerciseSeed] = []
     skipped: list[str] = []
 
     for item in raw_items:
-        primary_reference = item.get("primary_muscle") or item.get("muscle") or item.get("muscle_id")
-        secondary_references = item.get("secondary_muscles", [])
+        is_external_catalog = "primary_muscle_group" in item
+        primary_reference = (
+            item.get("primary_muscle_group")
+            if is_external_catalog
+            else item.get("primary_muscle") or item.get("muscle") or item.get("muscle_id")
+        )
+        secondary_references = item.get("secondary_muscle_groups", []) if is_external_catalog else item.get("secondary_muscles", [])
         if not isinstance(secondary_references, list):
             skipped.append(item["name"])
             continue
 
-        primary_muscle = _resolve_muscle_reference(primary_reference, known_muscles)
-        secondary_muscles = [
-            _resolve_muscle_reference(reference, known_muscles)
-            for reference in secondary_references
-        ]
+        resolve_muscle = _resolve_external_muscle_group if is_external_catalog else lambda reference: _resolve_muscle_reference(reference, known_muscles)
+        primary_muscle = resolve_muscle(primary_reference)
+        secondary_muscles = [resolve_muscle(reference) for reference in secondary_references]
 
         if not primary_muscle or any(name is None for name in secondary_muscles):
             skipped.append(item["name"])
@@ -125,13 +172,14 @@ def load_exercise_catalog(
 
         exercises.append(
             ExerciseSeed(
-                name=item["name"],
-                pic=item.get("pic"),
+                name=_catalog_display_name(item["name"], is_external_catalog),
+                pic=item.get("thumbnail_url") or item.get("video_url") if is_external_catalog else item.get("pic"),
                 tips=item.get("tips"),
                 equipment=item.get("equipment"),
                 favourite=bool(item.get("favourite", False)),
                 primary_muscle=primary_muscle,
                 secondary_muscles=[name for name in secondary_muscles if name is not None],
+                catalog_id=item.get("id") if is_external_catalog else None,
             )
         )
 
@@ -140,16 +188,29 @@ def load_exercise_catalog(
 
 def _find_existing_exercise(
     exercise_seed: ExerciseSeed,
+    exercises_by_catalog_id: dict[str, Exercise],
     exercises_by_name: dict[str, Exercise],
     exercises_by_pic: dict[str, Exercise],
+    exercises_by_asset_code: dict[str, Exercise],
 ) -> Exercise | None:
+    if exercise_seed.catalog_id:
+        exercise = exercises_by_catalog_id.get(exercise_seed.catalog_id)
+        if exercise is not None:
+            return exercise
+
     exercise = exercises_by_name.get(exercise_seed.name)
     if exercise is not None:
         return exercise
 
     normalized_pic = _normalize_pic_key(exercise_seed.pic)
     if normalized_pic:
-        return exercises_by_pic.get(normalized_pic)
+        exercise = exercises_by_pic.get(normalized_pic)
+        if exercise is not None:
+            return exercise
+
+    asset_code = _asset_code(exercise_seed.pic)
+    if asset_code:
+        return exercises_by_asset_code.get(asset_code)
 
     return None
 
@@ -233,17 +294,33 @@ def _sync_muscles(session, muscles_to_seed: list[MuscleSeed]) -> tuple[dict[str,
     return muscles_by_name, muscles_created, muscles_updated
 
 
+def _ensure_catalog_muscles(muscles_to_seed: list[MuscleSeed], exercises_to_seed: list[ExerciseSeed]) -> list[MuscleSeed]:
+    seeds_by_name = {muscle.name: muscle for muscle in muscles_to_seed}
+    for muscle_name in {exercise.primary_muscle for exercise in exercises_to_seed}:
+        seeds_by_name.setdefault(muscle_name, MuscleSeed(name=muscle_name, pic=None))
+    return list(seeds_by_name.values())
+
+
 def _upsert_exercise(
     session,
     exercise_seed: ExerciseSeed,
     primary_muscle: Muscle,
+    exercises_by_catalog_id: dict[str, Exercise],
     exercises_by_name: dict[str, Exercise],
     exercises_by_pic: dict[str, Exercise],
+    exercises_by_asset_code: dict[str, Exercise],
 ) -> tuple[Exercise, bool]:
-    exercise = _find_existing_exercise(exercise_seed, exercises_by_name, exercises_by_pic)
+    exercise = _find_existing_exercise(
+        exercise_seed,
+        exercises_by_catalog_id,
+        exercises_by_name,
+        exercises_by_pic,
+        exercises_by_asset_code,
+    )
     if exercise is None:
         exercise = Exercise(
             id=uuid4(),
+            catalog_id=exercise_seed.catalog_id,
             name=exercise_seed.name,
             pic=exercise_seed.pic,
             tips=exercise_seed.tips,
@@ -253,19 +330,25 @@ def _upsert_exercise(
         )
         session.add(exercise)
         session.flush()
+        if exercise.catalog_id:
+            exercises_by_catalog_id[exercise.catalog_id] = exercise
         exercises_by_name[exercise_seed.name] = exercise
         normalized_pic = _normalize_pic_key(exercise.pic)
         if normalized_pic:
             exercises_by_pic[normalized_pic] = exercise
+        asset_code = _asset_code(exercise.pic)
+        if asset_code:
+            exercises_by_asset_code[asset_code] = exercise
         return exercise, True
 
     previous_name = exercise.name
     previous_pic = exercise.pic
+    if exercise_seed.catalog_id:
+        exercise.catalog_id = exercise_seed.catalog_id
+        exercises_by_catalog_id[exercise.catalog_id] = exercise
     exercise.name = exercise_seed.name
     exercise.pic = exercise_seed.pic
-    exercise.tips = exercise_seed.tips
     exercise.equipment = exercise_seed.equipment
-    exercise.favourite = exercise_seed.favourite
     exercise.muscle_id = primary_muscle.id
     if previous_name != exercise.name:
         exercises_by_name.pop(previous_name, None)
@@ -276,6 +359,9 @@ def _upsert_exercise(
         exercises_by_pic.pop(previous_pic_key, None)
     if current_pic_key:
         exercises_by_pic[current_pic_key] = exercise
+    asset_code = _asset_code(exercise.pic)
+    if asset_code:
+        exercises_by_asset_code[asset_code] = exercise
     return exercise, False
 
 
@@ -296,11 +382,25 @@ def _sync_exercises(
     session.flush()
 
     existing_exercises = session.query(Exercise).all()
+    exercises_by_catalog_id = {
+        exercise.catalog_id: exercise
+        for exercise in existing_exercises
+        if exercise.catalog_id
+    }
     exercises_by_name = {exercise.name: exercise for exercise in existing_exercises}
     exercises_by_pic = {
         normalized_pic: exercise
         for exercise in existing_exercises
         if (normalized_pic := _normalize_pic_key(exercise.pic)) is not None
+    }
+    asset_codes: dict[str, list[Exercise]] = defaultdict(list)
+    for exercise in existing_exercises:
+        if (asset_code := _asset_code(exercise.pic)) is not None:
+            asset_codes[asset_code].append(exercise)
+    exercises_by_asset_code = {
+        asset_code: exercises[0]
+        for asset_code, exercises in asset_codes.items()
+        if len(exercises) == 1
     }
     exercises_created = 0
     exercises_updated = 0
@@ -316,8 +416,10 @@ def _sync_exercises(
             session,
             exercise_seed,
             primary_muscle,
+            exercises_by_catalog_id,
             exercises_by_name,
             exercises_by_pic,
+            exercises_by_asset_code,
         )
         if created:
             exercises_created += 1
@@ -330,8 +432,8 @@ def _sync_exercises(
 
 
 def seed_from_uploads() -> SeedSummary:
-    muscles_to_seed = discover_muscles()
     exercises_to_seed, skipped_exercises = load_exercise_catalog()
+    muscles_to_seed = _ensure_catalog_muscles(discover_muscles(), exercises_to_seed)
 
     with session_scope() as session:
         muscles_by_name, muscles_created, muscles_updated = _sync_muscles(session, muscles_to_seed)

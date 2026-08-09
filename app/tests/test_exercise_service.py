@@ -55,6 +55,7 @@ def test_update_exercise_replaces_supplied_secondary_muscles():
     secondary_muscle_id = uuid4()
     exercise = SimpleNamespace(
         id=exercise_id,
+        catalog_id=None,
         name="Oddly Named Press",
         muscle_id=primary_muscle_id,
         pic=None,

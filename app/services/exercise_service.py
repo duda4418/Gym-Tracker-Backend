@@ -30,9 +30,16 @@ class ExerciseService:
         ]
         return ExerciseResponse(
             id=exercise.id,
+            catalog_id=exercise.catalog_id,
             name=exercise.name,
             muscle_id=exercise.muscle_id,
-            pic=settings.asset_url(f"/uploads/exercises/{exercise.pic}") if exercise.pic else None,
+            pic=(
+                exercise.pic
+                if exercise.pic and exercise.pic.startswith(("http://", "https://"))
+                else settings.asset_url(f"/uploads/exercises/{exercise.pic}")
+                if exercise.pic
+                else None
+            ),
             tips=exercise.tips,
             equipment=exercise.equipment,
             exercise_type=exercise.exercise_type,

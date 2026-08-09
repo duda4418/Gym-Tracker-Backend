@@ -2,7 +2,13 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
-from app.scripts.seed_upload_data import ExerciseSeed, _find_existing_exercise, discover_muscles, load_exercise_catalog
+from app.scripts.seed_upload_data import (
+    ExerciseSeed,
+    _asset_code,
+    _find_existing_exercise,
+    discover_muscles,
+    load_exercise_catalog,
+)
 
 
 LEGACY_CHEST_ID = "318783dd-51d9-4e7c-9ee9-7260cdfa8f1c"
@@ -80,6 +86,36 @@ def test_load_exercise_catalog_accepts_named_muscles(tmp_path: Path):
     assert exercises[0].secondary_muscles == ["Hamstrings", "Lower Back"]
 
 
+def test_load_exercise_catalog_accepts_external_schema(tmp_path: Path):
+    exercises_json = tmp_path / "exercises.json"
+    exercises_json.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "A1B2C3D4",
+                    "name": "Lever Chest Press",
+                    "equipment": "machine",
+                    "primary_muscle_group": "chest",
+                    "secondary_muscle_groups": ["triceps"],
+                    "thumbnail_url": "https://example.com/05771201-Machine-Chest-Press.jpg",
+                    "video_url": "https://example.com/05771201-Machine-Chest-Press.mp4",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    exercises, skipped = load_exercise_catalog(exercises_json)
+
+    assert skipped == []
+    assert exercises[0].catalog_id == "A1B2C3D4"
+    assert exercises[0].name == "Machine Chest Press"
+    assert exercises[0].equipment == "machine"
+    assert exercises[0].primary_muscle == "Chest"
+    assert exercises[0].secondary_muscles == ["Triceps"]
+    assert exercises[0].pic == "https://example.com/05771201-Machine-Chest-Press.jpg"
+
+
 def test_load_exercise_catalog_skips_unknown_muscle_ids(tmp_path: Path):
     exercises_json = tmp_path / "exercises.json"
     exercises_json.write_text(
@@ -119,8 +155,10 @@ def test_find_existing_exercise_falls_back_to_pic_match():
 
     matched = _find_existing_exercise(
         exercise_seed,
+        exercises_by_catalog_id={},
         exercises_by_name={existing.name: existing},
-        exercises_by_pic={existing.pic: existing},
+        exercises_by_pic={},
+        exercises_by_asset_code={_asset_code(existing.pic): existing},
     )
 
     assert matched is existing
