@@ -30,7 +30,8 @@ class ExerciseService:
         ]
         return ExerciseResponse(
             id=exercise.id,
-            catalog_id=exercise.catalog_id,
+            catalog_id=getattr(exercise, "catalog_id", None),
+            type=getattr(exercise, "catalog_type", None),
             name=exercise.name,
             muscle_id=exercise.muscle_id,
             pic=(
@@ -40,6 +41,8 @@ class ExerciseService:
                 if exercise.pic
                 else None
             ),
+            thumbnail_url=getattr(exercise, "thumbnail_url", None),
+            video_url=getattr(exercise, "video_url", None),
             tips=exercise.tips,
             equipment=exercise.equipment,
             exercise_type=exercise.exercise_type,

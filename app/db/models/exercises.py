@@ -16,8 +16,11 @@ class Exercise(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     catalog_id = Column(String, unique=True, nullable=True, index=True)
+    catalog_type = Column("type", String, nullable=True)
     name = Column(String, unique=True, nullable=False)
     pic = Column(String, nullable=True)
+    thumbnail_url = Column(String, nullable=True)
+    video_url = Column(String, nullable=True)
     tips = Column(String, nullable=True)
     equipment = Column(String, nullable=True)
     exercise_type = Column(String, nullable=False, default=ExerciseType.WEIGHTED.value)

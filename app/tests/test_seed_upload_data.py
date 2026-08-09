@@ -113,8 +113,8 @@ def test_load_exercise_catalog_accepts_external_schema(tmp_path: Path):
     assert exercises[0].catalog_id == "A1B2C3D4"
     assert exercises[0].name == "Machine Chest Press"
     assert exercises[0].equipment == "machine"
-    assert exercises[0].primary_muscle == "Chest"
-    assert exercises[0].secondary_muscles == ["Triceps"]
+    assert exercises[0].primary_muscle == "chest"
+    assert exercises[0].secondary_muscles == ["triceps"]
     assert exercises[0].pic == "https://example.com/05771201-Machine-Chest-Press.jpg"
 
 
@@ -164,6 +164,30 @@ def test_find_existing_exercise_falls_back_to_pic_match():
     )
 
     assert matched is existing
+
+
+def test_find_existing_external_catalog_exercise_matches_only_catalog_id():
+    existing = SimpleNamespace(name="Machine Chest Press", pic="shared.mp4")
+    exercise_seed = ExerciseSeed(
+        name="Machine Chest Press Variation",
+        pic="shared.mp4",
+        tips="",
+        equipment="machine",
+        favourite=False,
+        primary_muscle="chest",
+        secondary_muscles=[],
+        catalog_id="distinct-catalog-id",
+    )
+
+    matched = _find_existing_exercise(
+        exercise_seed,
+        exercises_by_catalog_id={},
+        exercises_by_name={existing.name: existing},
+        exercises_by_pic={"shared.mp4": existing},
+        exercises_by_asset_code={},
+    )
+
+    assert matched is None
 
 
 def test_catalog_uses_machine_instead_of_lever_names():

@@ -30,9 +30,12 @@ class ExerciseUpdate(BaseModel):
 class ExerciseResponse(BaseModel):
     id: UUID
     catalog_id: str | None = None
+    type: str | None = None
     name: str
     muscle_id: UUID
     pic: Optional[str]
+    thumbnail_url: str | None = None
+    video_url: str | None = None
     tips: Optional[str]
     equipment: Optional[str]
     exercise_type: ExerciseType = ExerciseType.WEIGHTED
