@@ -367,9 +367,11 @@ def _upsert_exercise(
 
 def _sync_secondary_muscle_links(session, exercise: Exercise, secondary_muscles: list[Muscle | None]) -> None:
     session.query(ExerciseSecondaryMuscle).filter_by(exercise_id=exercise.id).delete()
+    linked_muscle_ids = set()
     for secondary_muscle in secondary_muscles:
-        if secondary_muscle is not None:
+        if secondary_muscle is not None and secondary_muscle.id not in linked_muscle_ids:
             session.add(ExerciseSecondaryMuscle(exercise_id=exercise.id, muscle_id=secondary_muscle.id))
+            linked_muscle_ids.add(secondary_muscle.id)
 
 
 def _sync_exercises(

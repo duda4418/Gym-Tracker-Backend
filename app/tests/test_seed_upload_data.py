@@ -1,11 +1,13 @@
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from uuid import uuid4
 
 from app.scripts.seed_upload_data import (
     ExerciseSeed,
     _asset_code,
     _find_existing_exercise,
+    _sync_secondary_muscle_links,
     discover_muscles,
     load_exercise_catalog,
 )
@@ -170,5 +172,19 @@ def test_catalog_uses_machine_instead_of_lever_names():
     assert skipped == []
     assert all("Lever" not in exercise.name for exercise in exercises)
     assert any("Machine" in exercise.name for exercise in exercises)
+
+
+def test_sync_secondary_muscles_deduplicates_mapped_groups():
+    exercise_id = uuid4()
+    muscle_id = uuid4()
+    session = SimpleNamespace(query=lambda _: SimpleNamespace(filter_by=lambda **_: SimpleNamespace(delete=lambda: None)))
+    session.add = lambda link: links.append(link)
+    links = []
+    muscle = SimpleNamespace(id=muscle_id)
+
+    _sync_secondary_muscle_links(session, SimpleNamespace(id=exercise_id), [muscle, muscle])
+
+    assert len(links) == 1
+    assert links[0].muscle_id == muscle_id
 
 
