@@ -6,6 +6,7 @@ from uuid import uuid4
 from app.scripts.seed_upload_data import (
     ExerciseSeed,
     _asset_code,
+    _ensure_catalog_muscles,
     _find_existing_exercise,
     _sync_secondary_muscle_links,
     discover_muscles,
@@ -188,6 +189,29 @@ def test_find_existing_external_catalog_exercise_matches_only_catalog_id():
     )
 
     assert matched is None
+
+
+def test_external_catalog_muscles_use_shipped_image_files():
+    exercises = [
+        ExerciseSeed(
+            name="Example",
+            pic=None,
+            tips=None,
+            equipment="machine",
+            favourite=False,
+            primary_muscle="upper_back",
+            secondary_muscles=["adductors", "cardio"],
+            catalog_id="catalog-example",
+        )
+    ]
+
+    muscles = {muscle.name: muscle.pic for muscle in _ensure_catalog_muscles([], exercises)}
+
+    assert muscles == {
+        "upper_back": "Back.png",
+        "adductors": "Glutes.png",
+        "cardio": None,
+    }
 
 
 def test_catalog_uses_machine_instead_of_lever_names():

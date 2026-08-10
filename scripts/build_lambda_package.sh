@@ -15,7 +15,10 @@ rm -rf \
   build/lambda/package/app/logs \
   build/lambda/package/app/scripts \
   build/lambda/package/app/tests \
-  build/lambda/package/app/uploads
+  build/lambda/package/app/uploads/exercises
+rm -f \
+  build/lambda/package/app/uploads/exercises.json \
+  "build/lambda/package/app/uploads/generate exercises.py"
 
 (
   cd build/lambda/package

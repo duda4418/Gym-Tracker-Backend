@@ -112,7 +112,7 @@ jobs:
               CORS_ORIGINS: $cors_origins,
               CORS_ORIGIN_REGEX: $cors_origin_regex,
               ASSET_BASE_URL: $asset_base_url,
-              SERVE_LOCAL_UPLOADS: "false",
+              SERVE_LOCAL_UPLOADS: "true",
               LOG_TO_FILE: "false",
               METRICS_ENABLED: "false",
               OTEL_ENABLED: "false",

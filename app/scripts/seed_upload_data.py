@@ -35,6 +35,26 @@ LEGACY_MUSCLE_ID_TO_NAME = {
     "e1595911-ce98-478f-a556-5d8961e2c7db": "Shoulders",
 }
 
+EXTERNAL_MUSCLE_IMAGE_FILENAMES = {
+    "abdominals": "Abs.png",
+    "abductors": "Glutes.png",
+    "adductors": "Glutes.png",
+    "biceps": "Biceps.png",
+    "calves": "Calves.png",
+    "chest": "Chest.png",
+    "forearms": "Forearms.png",
+    "glutes": "Glutes.png",
+    "hamstrings": "Hamstrings.png",
+    "lats": "Lats.png",
+    "lower_back": "Lower Back.png",
+    "neck": "Neck.png",
+    "quadriceps": "Quadriceps.png",
+    "shoulders": "Shoulders.png",
+    "traps": "Traps.png",
+    "triceps": "Triceps.png",
+    "upper_back": "Back.png",
+}
+
 
 @dataclass(frozen=True)
 class MuscleSeed:
@@ -99,6 +119,10 @@ def _resolve_external_muscle_group(reference: str | None) -> str | None:
         return None
     normalized_reference = reference.strip().casefold()
     return normalized_reference or None
+
+
+def _external_muscle_image_filename(muscle_name: str) -> str | None:
+    return EXTERNAL_MUSCLE_IMAGE_FILENAMES.get(muscle_name)
 
 
 def _normalize_pic_key(pic: str | None) -> str | None:
@@ -286,7 +310,10 @@ def _ensure_catalog_muscles(muscles_to_seed: list[MuscleSeed], exercises_to_seed
         for exercise in exercises_to_seed
         for muscle_name in [exercise.primary_muscle, *exercise.secondary_muscles]
     }:
-        seeds_by_name.setdefault(muscle_name, MuscleSeed(name=muscle_name, pic=None))
+        seeds_by_name.setdefault(
+            muscle_name,
+            MuscleSeed(name=muscle_name, pic=_external_muscle_image_filename(muscle_name)),
+        )
     return list(seeds_by_name.values())
 
 
