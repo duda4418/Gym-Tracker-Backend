@@ -149,6 +149,77 @@ def _exercise_type(catalog_type: str | None) -> str:
     return "weighted" if catalog_type in {"weight_reps", "bodyweight_weighted", "short_distance_weight"} else "body weight"
 
 
+def _catalog_rest_time(name: str, primary_muscle: str) -> int:
+    normalized_name = name.casefold()
+
+    if primary_muscle == "abdominals":
+        return 60
+
+    isolation_terms = (
+        "upright row",
+        "straight arm pulldown",
+        "glute ham raise",
+        "nordic hamstrings",
+        "back extension",
+        "reverse hyperextension",
+    )
+    if any(term in normalized_name for term in isolation_terms):
+        return 90
+
+    lower_compound_terms = (
+        "squat",
+        "lunge",
+        "deadlift",
+        "hip thrust",
+        "leg press",
+        "step up",
+        "good morning",
+        "rack pull",
+        "box jump",
+        "frog jump",
+        "burpee",
+        "kettlebell swing",
+        "sled push",
+        "wall ball",
+        "clean",
+        "snatch",
+        "thruster",
+        "split jerk",
+        "overhead squat",
+    )
+    if any(term in normalized_name for term in lower_compound_terms):
+        return 180
+
+    upper_compound_terms = (
+        "bench press",
+        "chest press",
+        "floor press",
+        "hex press",
+        "squeeze press",
+        "push up",
+        "pushup",
+        "dip",
+        "pull up",
+        "pullup",
+        "chin up",
+        "chinup",
+        " row",
+        "row (",
+        "pulldown",
+        "shoulder press",
+        "overhead press",
+        "military press",
+        "push press",
+        "handstand push",
+        "pike push",
+        "muscle up",
+    )
+    if any(term in normalized_name for term in upper_compound_terms):
+        return 120
+
+    return 90
+
+
 def load_exercise_catalog(
     exercises_json: Path = EXERCISES_JSON,
     muscles_dir: Path = MUSCLES_DIR,
@@ -345,6 +416,7 @@ def _upsert_exercise(
             tips=exercise_seed.tips,
             equipment=exercise_seed.equipment,
             exercise_type=_exercise_type(exercise_seed.catalog_type),
+            rest_time=_catalog_rest_time(exercise_seed.name, exercise_seed.primary_muscle),
             favourite=exercise_seed.favourite,
             muscle_id=primary_muscle.id,
         )
@@ -373,6 +445,7 @@ def _upsert_exercise(
     exercise.video_url = exercise_seed.video_url
     exercise.equipment = exercise_seed.equipment
     exercise.exercise_type = _exercise_type(exercise_seed.catalog_type)
+    exercise.rest_time = _catalog_rest_time(exercise_seed.name, exercise_seed.primary_muscle)
     exercise.muscle_id = primary_muscle.id
     if previous_name != exercise.name:
         exercises_by_name.pop(previous_name, None)

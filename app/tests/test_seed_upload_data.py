@@ -6,6 +6,7 @@ from uuid import uuid4
 from app.scripts.seed_upload_data import (
     ExerciseSeed,
     _asset_code,
+    _catalog_rest_time,
     _ensure_catalog_muscles,
     _find_existing_exercise,
     _sync_secondary_muscle_links,
@@ -212,6 +213,20 @@ def test_external_catalog_muscles_use_shipped_image_files():
         "adductors": "Glutes.png",
         "cardio": None,
     }
+
+
+def test_catalog_rest_time_uses_movement_category():
+    assert _catalog_rest_time("Ab Wheel", "abdominals") == 60
+    assert _catalog_rest_time("Squat (Barbell)", "quadriceps") == 180
+    assert _catalog_rest_time("Romanian Deadlift (Barbell)", "hamstrings") == 180
+    assert _catalog_rest_time("Floor Press (Barbell)", "chest") == 120
+    assert _catalog_rest_time("Bench Press (Barbell)", "chest") == 120
+    assert _catalog_rest_time("Pull Up", "lats") == 120
+    assert _catalog_rest_time("Bicep Curl (Dumbbell)", "biceps") == 90
+    assert _catalog_rest_time("Upright Row (Barbell)", "shoulders") == 90
+    assert _catalog_rest_time("Nordic Hamstrings Curls", "hamstrings") == 90
+    assert _catalog_rest_time("Leg Extension (Machine)", "quadriceps") == 90
+    assert _catalog_rest_time("Running", "cardio") == 90
 
 
 def test_catalog_uses_machine_instead_of_lever_names():
