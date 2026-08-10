@@ -92,6 +92,12 @@ jobs:
           ASSET_BASE_URL: "${{ vars.ASSET_BASE_URL || '' }}"
         run: |
           set -euo pipefail
+          if [ -z "$ASSET_BASE_URL" ]; then
+            ASSET_BASE_URL=$(aws lambda get-function-url-config \
+              --function-name "$LAMBDA_FUNCTION_NAME" \
+              --query FunctionUrl \
+              --output text)
+          fi
           jq -n \
             --arg database_url "$NEON_POOLED_DATABASE_URL" \
             --arg jwt_secret_key "$JWT_SECRET_KEY" \
