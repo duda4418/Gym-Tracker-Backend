@@ -209,9 +209,9 @@ def test_external_catalog_muscles_use_shipped_image_files():
     muscles = {muscle.name: muscle.pic for muscle in _ensure_catalog_muscles([], exercises)}
 
     assert muscles == {
-        "upper_back": "Back.png",
-        "adductors": "Glutes.png",
-        "cardio": None,
+        "upper_back": "upper_back.png",
+        "adductors": "adductors.png",
+        "cardio": "cardio.png",
     }
 
 

@@ -1,10 +1,7 @@
 from fastapi import HTTPException
 
-from app.core.config import get_settings
 from app.schemas.muscles import MuscleCreate, MuscleResponse
 from app.repositories.muscle_repository import MuscleRepository
-
-settings = get_settings()
 
 
 class MuscleService:
@@ -17,7 +14,7 @@ class MuscleService:
             MuscleResponse(
                 id=muscle.id,
                 name=muscle.name,
-                pic=settings.asset_url(f"/uploads/muscles/{muscle.pic}") if muscle.pic else None,
+                pic=muscle.pic,
             )
             for muscle in muscles
         ]

@@ -17,12 +17,13 @@ def test_health_check(client):
 def test_get_muscles(client):
     class Service:
         async def get_muscles(self):
-            return [{"id": str(uuid4()), "name": "Chest", "pic": "/uploads/muscles/chest.png"}]
+            return [{"id": str(uuid4()), "name": "Chest", "pic": "chest.png"}]
 
     client.app.dependency_overrides[deps.get_muscle_service] = lambda: Service()
     response = client.get("/muscles")
     assert response.status_code == 200
     assert response.json()[0]["name"] == "Chest"
+    assert response.json()[0]["pic"] == "chest.png"
 
 
 def test_create_muscle(client):
