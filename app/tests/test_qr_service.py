@@ -51,6 +51,22 @@ def test_get_qr_image_returns_stored_bytes_and_content_type():
     assert asyncio.run(service.get_qr_image(user.id)) == (b"png-data", "image/png")
 
 
+def test_upload_qr_accepts_webp():
+    user = SimpleNamespace(id=uuid4(), qr_code=None, qr_code_data=None, qr_code_content_type=None)
+    repo = QRRepositoryStub(user)
+    service = QRService(repo)
+    upload = UploadFile(
+        file=BytesIO(b"webp-data"),
+        filename="qr.webp",
+        headers=Headers({"content-type": "image/webp"}),
+    )
+
+    asyncio.run(service.upload_qr(user.id, upload))
+
+    assert user.qr_code_data == b"webp-data"
+    assert user.qr_code_content_type == "image/webp"
+
+
 def test_delete_qr_clears_stored_image():
     user = SimpleNamespace(
         id=uuid4(),

@@ -1,8 +1,10 @@
 from fastapi import HTTPException, UploadFile
 
+from app.core.config import get_settings
 from app.repositories.qr_repository import QRRepository
 
 QR_IMAGE_URL = "/users/qr-image"
+settings = get_settings()
 
 
 class QRService:
@@ -10,9 +12,9 @@ class QRService:
         self.repo = repo
 
     async def upload_qr(self, user_id, file: UploadFile):
-        allowed_types = ["image/jpeg", "image/png"]
+        allowed_types = {"image/jpeg", "image/png", "image/webp"}
         if file.content_type not in allowed_types:
-            raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG and PNG are allowed.")
+            raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG, PNG, and WebP are allowed.")
 
         contents = await file.read()
         if len(contents) > 1 * 1024 * 1024:
@@ -30,7 +32,7 @@ class QRService:
             return {
                 "success": True,
                 "message": "QR code uploaded successfully",
-                "qr_code_url": QR_IMAGE_URL,
+                "qr_code_url": settings.asset_url(QR_IMAGE_URL),
             }
         except Exception as exc:
             raise HTTPException(status_code=500, detail=f"Failed to upload QR code: {str(exc)}")
@@ -41,7 +43,7 @@ class QRService:
             raise HTTPException(status_code=404, detail="User not found")
         if not user.qr_code_data:
             raise HTTPException(status_code=404, detail="No QR code found for this user")
-        return {"qr_code_url": QR_IMAGE_URL}
+        return {"qr_code_url": settings.asset_url(QR_IMAGE_URL)}
 
     async def get_qr_image(self, user_id):
         user = self.repo.get_user_by_id(user_id)

@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import HTTPException
 import jwt
 
+from app.core.config import get_settings
 from app.schemas.auth import AuthResponse, AuthUserResponse, TokenPairResponse
 from app.schemas.users import AuthenticatedUser, UserResponse
 from app.repositories.auth_repository import AuthRepository
@@ -18,6 +19,8 @@ from app.utils.auth import (
     verify_password,
 )
 from app.services.profile_service import PROFILE_PICTURE_URL
+
+settings = get_settings()
 
 
 class AuthService:
@@ -59,7 +62,7 @@ class AuthService:
             id=db_user.id,
             email=db_user.email,
             name=db_user.name,
-            profile_pic=PROFILE_PICTURE_URL if db_user.profile_pic_data else None,
+            profile_pic=settings.asset_url(PROFILE_PICTURE_URL) if db_user.profile_pic_data else None,
         )
 
     async def authenticate_access_token(self, token: str) -> AuthenticatedUser:
@@ -68,7 +71,7 @@ class AuthService:
             id=db_user.id,
             email=db_user.email,
             name=db_user.name,
-            profile_pic=PROFILE_PICTURE_URL if db_user.profile_pic_data else None,
+            profile_pic=settings.asset_url(PROFILE_PICTURE_URL) if db_user.profile_pic_data else None,
         )
 
     async def logout(self, user_id, refresh_token: str | None = None) -> dict:
@@ -106,7 +109,7 @@ class AuthService:
             user=AuthUserResponse(
                 id=user.id,
                 email=user.email,
-                profile_pic=PROFILE_PICTURE_URL if user.profile_pic_data else None,
+                profile_pic=settings.asset_url(PROFILE_PICTURE_URL) if user.profile_pic_data else None,
             ),
         )
 

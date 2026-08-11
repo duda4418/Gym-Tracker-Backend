@@ -8,6 +8,7 @@ from app.services.qr_service import QRService
 qrcode_router = APIRouter(tags=["QR Codes"], dependencies=[Depends(get_current_user)])
 
 @qrcode_router.post("/users/upload-qr")
+@qrcode_router.put("/users/upload-qr")
 async def upload_qrcode(
         file: UploadFile = File(...),
         current_user: AuthenticatedUser = Depends(get_current_user),
@@ -46,6 +47,7 @@ async def delete_qrcode(
 
 
 @qrcode_router.post("/users/profile-picture")
+@qrcode_router.put("/users/profile-picture")
 async def upload_profile_picture(
     file: UploadFile = File(...),
     current_user: AuthenticatedUser = Depends(get_current_user),

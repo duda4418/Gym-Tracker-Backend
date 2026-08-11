@@ -1,8 +1,10 @@
 from fastapi import HTTPException, UploadFile
 
+from app.core.config import get_settings
 from app.repositories.user_repository import UserRepository
 
 PROFILE_PICTURE_URL = "/users/profile-picture"
+settings = get_settings()
 
 
 class ProfileService:
@@ -31,7 +33,7 @@ class ProfileService:
         return {
             "success": True,
             "message": "Profile picture uploaded successfully",
-            "profile_pic": PROFILE_PICTURE_URL,
+            "profile_pic": settings.asset_url(PROFILE_PICTURE_URL),
         }
 
     async def get_profile_picture(self, user_id) -> tuple[bytes, str]:

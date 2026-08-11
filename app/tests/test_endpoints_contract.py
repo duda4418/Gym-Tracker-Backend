@@ -318,6 +318,9 @@ def test_upload_qr(client):
     response = client.post("/users/upload-qr", files={"file": ("qr.png", b"png", "image/png")})
     assert response.status_code == 200
 
+    response = client.put("/users/upload-qr", files={"file": ("qr.png", b"png", "image/png")})
+    assert response.status_code == 200
+
 
 def test_get_qr(client):
     class Service:
@@ -374,6 +377,12 @@ def test_upload_profile_picture(client):
 
     assert response.status_code == 200
     assert response.json()["profile_pic"] == "/users/profile-picture"
+
+    response = client.put(
+        "/users/profile-picture",
+        files={"file": ("profile.webp", b"webp", "image/webp")},
+    )
+    assert response.status_code == 200
 
 
 def test_get_profile_picture(client):
